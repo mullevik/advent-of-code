@@ -9,4 +9,6 @@
     "python.linting.flake8Args": [
         "--max-line-length=100"
     ],
+    "files.autoSave": "off",
+    "editor.formatOnSave": true,
 }
