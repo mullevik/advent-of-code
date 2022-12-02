@@ -1,6 +1,6 @@
 def load_lines(path: str) -> list[str]:
     with open(path, "r") as fp:
-        return fp.readlines()
+        return [line.strip() for line in fp.readlines()]
 
 
 def load_lines_as_integers(path: str) -> list[int]:
