@@ -1,4 +1,4 @@
-from aoc_python.utils import load_lines
+from aoc_python.utils import load_stripped_lines
 
 
 def does_completely_overlap(line: str) -> bool:
@@ -16,7 +16,7 @@ def does_completely_overlap(line: str) -> bool:
 
 
 if __name__ == "__main__":
-    lines = load_lines("inputs/04_1")
+    lines = load_stripped_lines("inputs/04_1")
 
     overlaps = [does_completely_overlap(line) for line in lines]
     # print(overlaps)

@@ -1,4 +1,4 @@
-from aoc_python.utils import load_lines
+from aoc_python.utils import load_stripped_lines
 
 
 def get_priority(char: str) -> int:
@@ -7,7 +7,7 @@ def get_priority(char: str) -> int:
 
 
 if __name__ == "__main__":
-    lines = load_lines("inputs/03_1")
+    lines = load_stripped_lines("inputs/03_1")
 
     n_lines = len(lines)
     priorities = []

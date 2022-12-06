@@ -1,4 +1,4 @@
-from aoc_python.utils import load_lines
+from aoc_python.utils import load_stripped_lines
 
 
 def game_outcome(opponent: str, me: str) -> str:
@@ -69,7 +69,7 @@ def score_game(game: str) -> int:
 
 
 if __name__ == "__main__":
-    games = load_lines("inputs/02_1")
+    games = load_stripped_lines("inputs/02_1")
 
     game_scores = [score_game(x) for x in games]
 
