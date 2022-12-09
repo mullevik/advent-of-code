@@ -17,9 +17,7 @@ def load_stacks(lines: list[str]) -> dict[int, list[str]]:
 
 def load_instructions(lines: list[str]) -> list[tuple[int, int, int]]:
     return [
-        tuple(
-            int(x) for x in line.replace("move", "").replace("from", "").replace("to", "").split()
-        )
+        tuple(int(x) for x in line.replace("move", "").replace("from", "").replace("to", "").split())
         for line in lines
         if "move" in line
     ]

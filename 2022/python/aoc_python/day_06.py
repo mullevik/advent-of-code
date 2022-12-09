@@ -8,9 +8,7 @@ if __name__ == "__main__":
 
     for i in range(len(first_line)):
         substring = first_line[max(0, i - (stream_size - 1)) : i + 1]
-        # print(substring)
         if len(substring) == stream_size:
-            # print(substring)
             if len(set(substring)) == stream_size:
                 print(i + 1)
                 exit(0)

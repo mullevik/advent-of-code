@@ -13,12 +13,9 @@ if __name__ == "__main__":
     priorities = []
 
     for index in range(0, n_lines, 3):
-        common = (
-            set(lines[index])
-            .intersection(set(lines[index + 1]))
-            .intersection(set(lines[index + 2]))
-        )
-        assert len(common) == 1
+        common = set(lines[index]).intersection(set(lines[index + 1])).intersection(set(lines[index + 2]))
+        if len(common) != 1:
+            raise ValueError("not a single common item found")
         priorities.append(get_priority(next(iter(common))))
 
     print(sum(priorities))
