@@ -60,7 +60,6 @@ I consider my solution to be solid.
 
 It took me 1:07:00.
 
-
 ## Day 9
 
 Simulating chain with iterative rules.
@@ -69,3 +68,13 @@ Nice animation.
 I consider my solution to be ok.
 
 It took me 1:50:00.
+
+## Day 10
+
+Simulating CRT screen sprite drawing.
+Simple iteration, not much about it.
+Nice animation.
+
+I consider my solution to be meh.
+
+It took me 0:49:20.
