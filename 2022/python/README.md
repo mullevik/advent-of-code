@@ -78,3 +78,12 @@ Nice animation.
 I consider my solution to be meh.
 
 It took me 0:49:20.
+
+## Day 11
+
+Very tedious parsing of monkey information.
+Simple simulation iteration with interesting discrete math optimization for part two.
+
+I consider my solution to be good.
+
+It took me 1:20:29
