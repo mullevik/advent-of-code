@@ -87,3 +87,12 @@ Simple simulation iteration with interesting discrete math optimization for part
 I consider my solution to be good.
 
 It took me 1:20:29
+
+## Day 12
+
+Very tipical BFS algorithm task.
+Second part needs to reverse the BFS from sink.
+
+I consider my solution to be good.
+
+It took me 0:55:00

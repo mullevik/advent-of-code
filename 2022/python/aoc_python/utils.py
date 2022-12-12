@@ -53,6 +53,9 @@ class GenericVec2(Generic[T]):
             return self.tuple == __o.tuple
         raise ValueError(f"unsupported eq for type {type(__o)}")
 
+    def __hash__(self) -> int:
+        return self.tuple.__hash__()
+
 
 @dataclass(frozen=True)
 class Point(GenericVec2[int]):
@@ -167,6 +170,8 @@ class Grid2(Generic[T]):
         def draw(item: T) -> str:
             if isinstance(item, bool):
                 return "T" if item else "f"
+            if isinstance(item, int):
+                return f"{item:>2} "
             return str(item)
 
         return "\n".join(["".join(draw(item) for item in row) for row in self.cells])
