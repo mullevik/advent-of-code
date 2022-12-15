@@ -105,3 +105,13 @@ I decided to implement my merge sort just to because.
 I consider my solution to be bad.
 
 It took me 2:25:00 (that first part was awful).
+
+## Day 14
+
+Falling sand simulation.
+Simple while looping.
+Nice animation.
+
+I consider my solution to be good.
+
+It took me 0:49:25.
