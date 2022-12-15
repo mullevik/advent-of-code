@@ -96,3 +96,12 @@ Second part needs to reverse the BFS from sink.
 I consider my solution to be good.
 
 It took me 0:55:00
+
+## Day 13
+
+Very precise decision making (I hated that part) plus a sorting algorithm.
+I decided to implement my merge sort just to because.
+
+I consider my solution to be bad.
+
+It took me 2:25:00 (that first part was awful).

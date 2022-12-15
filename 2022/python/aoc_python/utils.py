@@ -2,7 +2,7 @@ import copy
 from dataclasses import dataclass
 import itertools
 import os
-from typing import Generic, TypeVar, Union
+from typing import Any, Generic, TypeVar, Union
 from collections.abc import Iterable
 
 
