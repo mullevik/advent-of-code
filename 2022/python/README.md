@@ -115,3 +115,13 @@ Nice animation.
 I consider my solution to be good.
 
 It took me 0:49:25.
+
+## Day 15
+
+Intersections of rotated squares in 2D space.
+Line to point intersection and line to line intersection.
+Manhattan distance.
+
+I consider my solution to be ok.
+
+It took me 2:05:00

@@ -41,7 +41,7 @@ def solve_first(path: str) -> int:
 
 def scenic_score(trees: Grid2, p: Point) -> int:
     visibility = Grid2.filled_with(trees.width, trees.height, False)
-    for direction in Point(0, 0).four_neighbours:
+    for direction in Point(0, 0).four_neighbors:
         start = p + direction
         if visibility.has(start):
             cast_ray(trees, visibility, p + direction, direction)

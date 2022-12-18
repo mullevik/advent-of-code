@@ -76,7 +76,7 @@ class Point(GenericVec2[int]):
         return Point(self.x // other, self.y // other)
 
     @property
-    def four_neighbours(self) -> tuple["Point", ...]:
+    def four_neighbors(self) -> tuple["Point", ...]:
         return tuple(
             Point(self.x + x, self.y + y) for x, y in itertools.product([1, 0, -1], [1, 0, -1]) if (x == 0) ^ (y == 0)
         )
@@ -127,7 +127,7 @@ class Grid2(Generic[T]):
         return 0 <= p.x < self.width and 0 <= p.y < self.height
 
     def four_neightbours(self, p: Point) -> tuple[Point, ...]:
-        return tuple(n for n in p.four_neighbours if self.has(n))
+        return tuple(n for n in p.four_neighbors if self.has(n))
 
     def eight_neighbours(self, p: Point) -> tuple[Point, ...]:
         return tuple(n for n in p.eight_neighbours if self.has(n))
