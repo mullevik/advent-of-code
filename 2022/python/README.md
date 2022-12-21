@@ -125,3 +125,12 @@ Manhattan distance.
 I consider my solution to be ok.
 
 It took me 2:05:00
+
+## Day 16
+
+Search of a big search space.
+Solved by pruning most of the paths by filtering out impossible branches.
+
+I consider my solution to be awful. The second part took multiple hours to compute the correct solution.
+
+It took me 5:00:00
