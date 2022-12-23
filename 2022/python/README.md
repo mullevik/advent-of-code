@@ -124,7 +124,7 @@ Manhattan distance.
 
 I consider my solution to be ok.
 
-It took me 2:05:00
+It took me 2:05:00.
 
 ## Day 16
 
@@ -133,4 +133,14 @@ Solved by pruning most of the paths by filtering out impossible branches.
 
 I consider my solution to be awful. The second part took multiple hours to compute the correct solution.
 
-It took me 5:00:00
+It took me 5:00:00.
+
+## Day 17
+
+Tetris simulation for part one.
+Periodic detection and linear model prediction for part two.
+
+I consider my solution to be fine.
+
+It took me 2:45:00.
+
