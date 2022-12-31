@@ -1,5 +1,5 @@
 import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import itertools
 import os
 from typing import Any, Generic, TypeVar, Union
@@ -37,19 +37,19 @@ def clear_outputs() -> None:
 T = TypeVar("T")
 
 
-@dataclass(frozen=True)
-class GenericVec2(Generic[T]):
-    x: T
-    y: T
+class GenericVec(Generic[T]):
+    def __init__(self, data: tuple[T, ...]) -> None:
+        super().__init__()
+        self.data = data
 
     @property
-    def tuple(self) -> tuple[T, T]:
-        return self.x, self.y
+    def tuple(self) -> tuple[T, ...]:
+        return self.data
 
     def __eq__(self, __o: object) -> bool:
         if isinstance(__o, tuple):
             return self.tuple == __o
-        elif isinstance(__o, GenericVec2):
+        elif isinstance(__o, GenericVec):
             return self.tuple == __o.tuple
         raise ValueError(f"unsupported eq for type {type(__o)}")
 
@@ -57,40 +57,117 @@ class GenericVec2(Generic[T]):
         return self.tuple.__hash__()
 
 
-@dataclass(frozen=True)
-class Point(GenericVec2[int]):
-    def __add__(self, other: Union["Point", int]) -> "Point":
-        if isinstance(other, Point):
-            return Point(self.x + other.x, self.y + other.y)
-        return Point(self.x + other, self.y + other)
-
-    def __sub__(self, other: Union["Point", int]) -> "Point":
-        if isinstance(other, Point):
-            return Point(self.x - other.x, self.y - other.y)
-        return Point(self.x - other, self.y - other)
-
-    def __mul__(self, other: int) -> "Point":
-        return Point(self.x * other, self.y * other)
-
-    def __floordiv__(self, other: int) -> "Point":
-        return Point(self.x // other, self.y // other)
+class GenericVec2(GenericVec[T]):
+    def __init__(self, x: T, y: T) -> None:
+        super().__init__((x, y))
 
     @property
-    def four_neighbors(self) -> tuple["Point", ...]:
+    def x(self) -> T:
+        return self.data[0]
+
+    @property
+    def y(self) -> T:
+        return self.data[1]
+
+    @property
+    def tuple(self) -> tuple[T, T]:
+        return self.data[0], self.data[1]
+
+
+class GenericVec3(GenericVec[T]):
+    def __init__(self, x: T, y: T, z: T) -> None:
+        super().__init__((x, y, z))
+
+    @property
+    def x(self) -> T:
+        return self.data[0]
+
+    @property
+    def y(self) -> T:
+        return self.data[1]
+
+    @property
+    def z(self) -> T:
+        return self.data[2]
+
+    @property
+    def tuple(self) -> tuple[T, T, T]:
+        return self.data[0], self.data[1], self.data[2]
+
+
+class Point2(GenericVec2[int]):
+    def __init__(self, x: int, y: int) -> None:
+        super().__init__(x, y)
+
+    def __add__(self, other: Union["Point2", int]) -> "Point2":
+        if isinstance(other, Point2):
+            return Point2(self.x + other.x, self.y + other.y)
+        return Point2(self.x + other, self.y + other)
+
+    def __sub__(self, other: Union["Point2", int]) -> "Point2":
+        if isinstance(other, Point2):
+            return Point2(self.x - other.x, self.y - other.y)
+        return Point2(self.x - other, self.y - other)
+
+    def __mul__(self, other: int) -> "Point2":
+        return Point2(self.x * other, self.y * other)
+
+    def __floordiv__(self, other: int) -> "Point2":
+        return Point2(self.x // other, self.y // other)
+
+    @property
+    def four_neighbors(self) -> tuple["Point2", ...]:
         return tuple(
-            Point(self.x + x, self.y + y) for x, y in itertools.product([1, 0, -1], [1, 0, -1]) if (x == 0) ^ (y == 0)
+            Point2(self.x + x, self.y + y) for x, y in itertools.product([1, 0, -1], [1, 0, -1]) if (x == 0) ^ (y == 0)
         )
 
     @property
-    def eight_neighbours(self) -> tuple["Point", ...]:
+    def eight_neighbors(self) -> tuple["Point2", ...]:
         return tuple(
-            Point(self.x + x, self.y + y)
+            Point2(self.x + x, self.y + y)
             for x, y in itertools.product([1, 0, -1], [1, 0, -1])
             if not (x == 0 and y == 0)
         )
 
     def __str__(self) -> str:
         return str((self.x, self.y))
+
+
+class Point3(GenericVec3[int]):
+    def __init__(self, x: int, y: int, z: int) -> None:
+        super().__init__(x, y, z)
+
+    def __add__(self, other: Union["Point3", int]) -> "Point3":
+        if isinstance(other, Point3):
+            return Point3(self.x + other.x, self.y + other.y, self.z + other.z)
+        return Point3(self.x + other, self.y + other, self.z + other)
+
+    def __sub__(self, other: Union["Point3", int]) -> "Point3":
+        if isinstance(other, Point3):
+            return Point3(self.x - other.x, self.y - other.y, self.z - other.z)
+        return Point3(self.x - other, self.y - other, self.z - other)
+
+    def __mul__(self, other: int) -> "Point3":
+        return Point3(self.x * other, self.y * other, self.z * other)
+
+    def __floordiv__(self, other: int) -> "Point3":
+        return Point3(self.x // other, self.y // other, self.z // other)
+
+    @property
+    def six_neighbors(self) -> tuple["Point3", ...]:
+        return tuple(
+            [
+                self + Point3(1, 0, 0),
+                self + Point3(-1, 0, 0),
+                self + Point3(0, 1, 0),
+                self + Point3(0, -1, 0),
+                self + Point3(0, 0, 1),
+                self + Point3(0, 0, -1),
+            ]
+        )
+
+    def __str__(self) -> str:
+        return str((self.x, self.y, self.z))
 
 
 def sign(x: int | float) -> int:
@@ -109,7 +186,7 @@ class Vec2Float(GenericVec2[float]):
 @dataclass
 class Grid2(Generic[T]):
     cells: list[list[T]]
-    _iter_point: Point = Point(0, 0)
+    _iter_point: Point2 = Point2(0, 0)
 
     @classmethod
     def filled_with(cls, w: int, h: int, fill_value: T) -> "Grid2":
@@ -123,35 +200,35 @@ class Grid2(Generic[T]):
     def height(self) -> int:
         return len(self.cells)
 
-    def has(self, p: Point) -> bool:
+    def has(self, p: Point2) -> bool:
         return 0 <= p.x < self.width and 0 <= p.y < self.height
 
-    def four_neightbours(self, p: Point) -> tuple[Point, ...]:
+    def four_neighbors(self, p: Point2) -> tuple[Point2, ...]:
         return tuple(n for n in p.four_neighbors if self.has(n))
 
-    def eight_neighbours(self, p: Point) -> tuple[Point, ...]:
-        return tuple(n for n in p.eight_neighbours if self.has(n))
+    def eight_neighbors(self, p: Point2) -> tuple[Point2, ...]:
+        return tuple(n for n in p.eight_neighbors if self.has(n))
 
-    def next(self, p: Point) -> Point | None:
-        next_p = p + Point(1, 0)
+    def next(self, p: Point2) -> Point2 | None:
+        next_p = p + Point2(1, 0)
         if self.has(next_p):
             return next_p
-        next_row_p = Point(0, p.y + 1)
+        next_row_p = Point2(0, p.y + 1)
         if self.has(next_row_p):
             return next_row_p
         return None
 
-    def __getitem__(self, p: Point | tuple[int, int]) -> T:
+    def __getitem__(self, p: Point2 | tuple[int, int]) -> T:
         if isinstance(p, tuple):
-            p = Point(p[0], p[1])
-        if isinstance(p, Point) and self.has(p):
+            p = Point2(p[0], p[1])
+        if isinstance(p, Point2) and self.has(p):
             return self.cells[p.y][p.x]
         raise IndexError(f"can not get item {type(p)} {p}")
 
-    def __setitem__(self, p: Point | tuple[int, int], item: T) -> None:
+    def __setitem__(self, p: Point2 | tuple[int, int], item: T) -> None:
         if isinstance(p, tuple):
-            p = Point(p[0], p[1])
-        if isinstance(p, Point) and self.has(p):
+            p = Point2(p[0], p[1])
+        if isinstance(p, Point2) and self.has(p):
             self.cells[p.y][p.x] = item
         else:
             raise IndexError(f"can not set item at {type(p)} {p}")
@@ -159,7 +236,7 @@ class Grid2(Generic[T]):
     def __iter__(self) -> "Grid2":
         return Grid2(copy.deepcopy(self.cells))
 
-    def __next__(self) -> tuple[Point, T]:
+    def __next__(self) -> tuple[Point2, T]:
         next_p = self.next(self._iter_point)
         if next_p is None:
             raise StopIteration
@@ -180,20 +257,20 @@ class Grid2(Generic[T]):
 if __name__ == "__main__":
 
     grid = Grid2.filled_with(10, 10, 0)
-    center = Point(5, 5)
-    out = Point(10, 10)
+    center = Point2(5, 5)
+    out = Point2(10, 10)
     assert grid.has(center)
     assert not grid.has(out)
 
-    for n in grid.eight_neighbours(center):
+    for n in grid.eight_neighbors(center):
         grid[n] = 1
-    for n in grid.four_neightbours(center):
+    for n in grid.four_neighbors(center):
         grid[n] = 2
-    for n in grid.eight_neighbours(out):
+    for n in grid.eight_neighbors(out):
         grid[n] = 3
     grid[0, 0] = 4
     assert grid[center] == 0
-    assert grid[center + Point(1, 0)] == 2
-    assert grid[center + Point(-1, -1)] == 1
-    assert grid[Point(9, 9)] == 3
+    assert grid[center + Point2(1, 0)] == 2
+    assert grid[center + Point2(-1, -1)] == 1
+    assert grid[Point2(9, 9)] == 3
     assert grid[(0, 0)] == 4

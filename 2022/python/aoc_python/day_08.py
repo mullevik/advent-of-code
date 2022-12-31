@@ -1,6 +1,6 @@
 import numpy as np
 
-from aoc_python.utils import Grid2, Point, load_stripped_lines
+from aoc_python.utils import Grid2, Point2, load_stripped_lines
 
 
 def parse(lines: list[str]) -> Grid2:
@@ -11,7 +11,7 @@ def parse(lines: list[str]) -> Grid2:
     return grid
 
 
-def cast_ray(trees: Grid2, visibility: Grid2, start: Point, direction: Point) -> None:
+def cast_ray(trees: Grid2, visibility: Grid2, start: Point2, direction: Point2) -> None:
     max_height = 0
     visibility[start] = True
     p = start
@@ -29,19 +29,19 @@ def solve_first(path: str) -> int:
     visibility = Grid2.filled_with(trees.width, trees.height, False)
 
     for y in range(trees.height):
-        cast_ray(trees, visibility, Point(0, y), Point(1, 0))
-        cast_ray(trees, visibility, Point(trees.width - 1, y), Point(-1, 0))
+        cast_ray(trees, visibility, Point2(0, y), Point2(1, 0))
+        cast_ray(trees, visibility, Point2(trees.width - 1, y), Point2(-1, 0))
 
     for x in range(trees.width):
-        cast_ray(trees, visibility, Point(x, 0), Point(0, 1))
-        cast_ray(trees, visibility, Point(x, trees.height - 1), Point(0, -1))
+        cast_ray(trees, visibility, Point2(x, 0), Point2(0, 1))
+        cast_ray(trees, visibility, Point2(x, trees.height - 1), Point2(0, -1))
 
     return sum(cell for row in visibility.cells for cell in row)
 
 
-def scenic_score(trees: Grid2, p: Point) -> int:
+def scenic_score(trees: Grid2, p: Point2) -> int:
     visibility = Grid2.filled_with(trees.width, trees.height, False)
-    for direction in Point(0, 0).four_neighbors:
+    for direction in Point2(0, 0).four_neighbors:
         start = p + direction
         if visibility.has(start):
             cast_ray(trees, visibility, p + direction, direction)

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from time import sleep
-from aoc_python.utils import Point, clear_outputs, load_raw_lines, sign
+from aoc_python.utils import Point2, clear_outputs, load_raw_lines, sign
 
 
 @dataclass

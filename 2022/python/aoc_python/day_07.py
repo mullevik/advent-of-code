@@ -32,7 +32,7 @@ class Directory(FSObject):
         return out[:-1] if self.contents else out
 
     @property
-    def size(self):
+    def size(self) -> int:
         return sum(_obj.size for _obj in self.contents.values())
 
     @property

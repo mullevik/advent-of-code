@@ -144,3 +144,26 @@ I consider my solution to be fine.
 
 It took me 2:45:00.
 
+
+## Day 18
+
+DFS in a 3D grid.
+Nothing strange about it.
+
+I consider my solution to be good (with hardcoded bounds though).
+
+It took me 0:45:00.
+
+
+## Day 19
+
+Skipped for now as it looks like a very difficult task - perhaps the most difficult one.
+
+
+## Day 20
+
+Very easy indexing and inserting/removing within a list of numbers.
+
+I consider my solution to be mediocre.
+
+It took me 0:35:00.
