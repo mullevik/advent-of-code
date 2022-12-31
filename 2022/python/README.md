@@ -167,3 +167,15 @@ Very easy indexing and inserting/removing within a list of numbers.
 I consider my solution to be mediocre.
 
 It took me 0:35:00.
+
+## Day 21
+
+Very interesting task.
+Math equation construction from a tree of simple operations.
+Part one was satisfying and it took me 18 minutes.
+Part two is a general solver for equations containing four basic arithmetic operations,
+which was actually more difficult then I anticipated.
+
+I consider my solution to contain too many special-case handlers.
+
+It took me 2:15:00.
