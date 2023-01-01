@@ -189,5 +189,10 @@ I consider my solution to be ok but not very general.
 
 It took me 3:30:00.
 
+# Day 23
 
+Very straight forward simulation that did not have any interesting twist...
 
+I consider my solution to be quite ugly because the first try solved the task.
+
+It took me 0:45:00.
