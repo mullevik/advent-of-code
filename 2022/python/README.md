@@ -179,3 +179,15 @@ which was actually more difficult then I anticipated.
 I consider my solution to contain too many special-case handlers.
 
 It took me 2:15:00.
+
+## Day 22
+
+Navigating a UV map of a cube.
+My solution has hardcoded edge warping.
+
+I consider my solution to be ok but not very general.
+
+It took me 3:30:00.
+
+
+

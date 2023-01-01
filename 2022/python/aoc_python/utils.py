@@ -1,6 +1,7 @@
 import copy
 from dataclasses import dataclass, field
 import itertools
+import math
 import os
 from typing import Any, Generic, TypeVar, Union
 from collections.abc import Iterable
@@ -132,6 +133,16 @@ class Point2(GenericVec2[int]):
     def __str__(self) -> str:
         return str((self.x, self.y))
 
+    def __repr__(self) -> str:
+        return f"Point2({self.x}, {self.y})"
+
+
+def rotate(p: Point2, rad: float) -> Point2:
+    """Rounded rotation of `p` around origin (0, 0) anticlockwise by `rad` radians."""
+    cs = math.cos(rad)
+    sn = math.sin(rad)
+    return Point2(round(cs * p.x - sn * p.y), round(sn * p.x + cs * p.y))
+
 
 class Point3(GenericVec3[int]):
     def __init__(self, x: int, y: int, z: int) -> None:
@@ -186,7 +197,7 @@ class Vec2Float(GenericVec2[float]):
 @dataclass
 class Grid2(Generic[T]):
     cells: list[list[T]]
-    _iter_point: Point2 = Point2(0, 0)
+    _iter_point: Point2 = Point2(-1, 0)
 
     @classmethod
     def filled_with(cls, w: int, h: int, fill_value: T) -> "Grid2":
@@ -274,3 +285,7 @@ if __name__ == "__main__":
     assert grid[center + Point2(-1, -1)] == 1
     assert grid[Point2(9, 9)] == 3
     assert grid[(0, 0)] == 4
+
+    assert rotate(Point2(1, 0), math.pi / 2) == Point2(0, 1)
+    assert rotate(Point2(2, 0), math.pi) == Point2(-2, 0)
+    assert rotate(Point2(1, 2), (3 / 2) * math.pi) == Point2(2, -1)
