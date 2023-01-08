@@ -196,3 +196,15 @@ Very straight forward simulation that did not have any interesting twist...
 I consider my solution to be quite ugly because the first try solved the task.
 
 It took me 0:45:00.
+
+
+# Day 24
+
+Path finding in a simulated environment.
+This was a fun one.
+Initially I tried A* for shortest paths but the state representation was too large.
+I solved it by BFS in space and time (all distances were 1).
+
+I consider my solution to be good.
+
+It took me 3:00:00 (including the failed A* attempt).
