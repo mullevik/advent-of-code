@@ -157,7 +157,12 @@ It took me 0:45:00.
 
 ## Day 19
 
-Skipped for now as it looks like a very difficult task - perhaps the most difficult one.
+Search space problem where time is an issue.
+This was a very difficult task that required some clever state space representation and also some pruning.
+
+I consider my solution to be alright.
+
+It took me 6:00:00.
 
 
 ## Day 20
