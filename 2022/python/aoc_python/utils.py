@@ -1,10 +1,12 @@
 import copy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from enum import IntEnum
 import itertools
 import math
 import os
-from typing import Any, Generic, TypeVar, Union
-from collections.abc import Iterable
+import curses
+
+from typing import Any, Generic, TypeAlias, TypeVar, Union
 
 
 def load_raw_lines(path: str) -> list[str]:
@@ -263,6 +265,25 @@ class Grid2(Generic[T]):
             return str(item)
 
         return "\n".join(["".join(draw(item) for item in row) for row in self.cells])
+
+
+Screen: TypeAlias = Any
+
+
+class Color(IntEnum):
+    RED = 1
+    GREEN = 2
+    BLUE = 3
+    YELLOW = 4
+    MAGENTA = 5
+
+
+def initialize_curses_colors() -> None:
+    curses.init_pair(Color.RED, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(Color.GREEN, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(Color.BLUE, curses.COLOR_BLUE, curses.COLOR_BLACK)
+    curses.init_pair(Color.YELLOW, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(Color.MAGENTA, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
 
 
 if __name__ == "__main__":

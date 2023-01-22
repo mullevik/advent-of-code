@@ -213,3 +213,12 @@ I solved it by BFS in space and time (all distances were 1).
 I consider my solution to be good.
 
 It took me 3:00:00 (including the failed A* attempt).
+
+
+# Day 25
+
+Converting numbers from one base to another.
+
+I consider my solution to be good.
+
+It took me 0:40:00.
