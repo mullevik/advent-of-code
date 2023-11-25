@@ -6,7 +6,7 @@ import math
 import os
 import curses
 
-from typing import Any, Generic, TypeAlias, TypeVar, Union
+from typing import Any, Generic, TypeAlias, TypeVar, Union, Iterable
 
 
 def load_raw_lines(path: str) -> list[str]:
@@ -276,6 +276,7 @@ class Color(IntEnum):
     BLUE = 3
     YELLOW = 4
     MAGENTA = 5
+    CYAN = 6
 
 
 def initialize_curses_colors() -> None:
@@ -284,6 +285,61 @@ def initialize_curses_colors() -> None:
     curses.init_pair(Color.BLUE, curses.COLOR_BLUE, curses.COLOR_BLACK)
     curses.init_pair(Color.YELLOW, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(Color.MAGENTA, curses.COLOR_MAGENTA, curses.COLOR_BLACK)
+    curses.init_pair(Color.CYAN, curses.COLOR_CYAN, curses.COLOR_BLACK)
+
+
+def euclidean_distance(p: Point2, q: Point2) -> float:
+    return math.sqrt(((q.x - p.x) ** 2) + ((q.y - p.y) ** 2))
+
+
+def _brehemsen_line_low(p: Point2, q: Point2) -> Iterable[Point2]:
+    dx = q.x - p.x
+    dy = q.y - p.y
+    yi = 1
+    if dy < 0:
+        yi = -1
+        dy = -dy
+    _d = (2 * dy) - dx
+    y = p.y
+
+    for x in range(p.x, q.x):
+        yield Point2(x, y)
+        if _d > 0:
+            y += yi
+            _d += 2 * (dy - dx)
+        else:
+            _d += 2 * dy
+
+
+def _brehemsen_line_high(p: Point2, q: Point2) -> Iterable[Point2]:
+    dx = q.x - p.x
+    dy = q.y - p.y
+    xi = 1
+    if dx < 0:
+        xi = -1
+        dx = -dx
+
+    _d = (2 * dx) - dy
+    x = p.x
+
+    for y in range(p.y, q.y):
+        yield Point2(x, y)
+        if _d > 0:
+            x += xi
+            _d += 2 * (dx - dy)
+        else:
+            _d += 2 * dx
+
+
+def brehemsen_line(p: Point2, q: Point2) -> list[Point2]:
+    existing_points = {p, q}
+    if abs(q.y - p.y) < abs(q.x - p.x):
+        if p.x > q.x:
+            return list(reversed([p for p in _brehemsen_line_low(q, p) if p not in existing_points]))
+        return [p for p in _brehemsen_line_low(p, q) if p not in existing_points]
+    if p.y > q.y:
+        return list(reversed([p for p in _brehemsen_line_high(q, p) if p not in existing_points]))
+    return [p for p in _brehemsen_line_high(p, q) if p not in existing_points]
 
 
 if __name__ == "__main__":

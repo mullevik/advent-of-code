@@ -70,14 +70,16 @@ $$ E = \{\{x, y\} \mid x,y \in V \land x \not = y \} $$
 with directed edges
 $$ E = \{(x, y) \mid x,y \in V \land x \not = y \} $$
 
-```{mermaid}
+```mermaid
 stateDiagram
     direction LR
     1 --> 2
     2 --> 3
     3 --> 1
 ```
-```{mermaid}
+
+
+```mermaid
 stateDiagram
     direction LR
     '2 --> '3
@@ -85,8 +87,9 @@ stateDiagram
     '1 --> '2
 ```
 
+
 path (oriented) (of length `2`)
-```{mermaid}
+```mermaid
 stateDiagram
     direction LR
     1 --> 2
@@ -94,7 +97,7 @@ stateDiagram
 ```
 
 cycle (oriented) (of length `3`)
-```{mermaid}
+```mermaid
 stateDiagram
     direction LR
     1 --> 2
@@ -106,7 +109,7 @@ stateDiagram
 
 ### Representation
 general graph representations
-```{mermaid}
+```mermaid
 stateDiagram
     direction LR
     1 --> 2
@@ -127,7 +130,7 @@ Matrix (`list[list[int]]`)
 
 
 Linked list (`dict[int, list[int]]`)
-```{mermaid}
+```mermaid
 stateDiagram
     direction LR
     '1 --> [2]
@@ -144,7 +147,7 @@ Matrix (`list[list[int]]`)
 | --- | --- |
 | 3   | 4   |
 
-```{mermaid}
+```mermaid
 stateDiagram
     direction LR
     1 --> 2
@@ -201,7 +204,7 @@ $$ \textnormal{get all neighbors of }u\textnormal{: } \mathcal{O}(n)$$
 
 
 Linked list (`dict[int, list[int]]`)
-```{mermaid}
+```mermaid
 stateDiagram
     direction LR
     '1 --> [2]

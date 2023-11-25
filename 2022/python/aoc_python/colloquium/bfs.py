@@ -1,6 +1,15 @@
 import curses
 import time
-from aoc_python.colloquium import parse_problem, reconstruct_path
+from aoc_python.colloquium import (
+    animate,
+    parse_grid_problem,
+    reconstruct_path,
+    viz_open,
+    viz_open_collection,
+    viz_path,
+    viz_predecessors,
+    viz_start_goal,
+)
 
 from aoc_python.utils import Grid2, Point2, initialize_curses_colors, Color
 
@@ -37,24 +46,13 @@ def bfs_viz(screen: curses.window, start: Point2, goal: Point2, grid: Grid2) -> 
         screen.addstr(p.y, p.x, v)
 
     while open:
-        for v in visited:
-            screen.addstr(v.y, v.x, ".", curses.color_pair(Color.YELLOW))
-
-        for o in open:
-            screen.addstr(o.y, o.x, "o", curses.color_pair(Color.YELLOW))
-
         current = open.pop(0)
+        viz_predecessors(screen, predecessors)
+        viz_open(screen, open)
+        viz_open_collection(screen, open, grid.width + 1)
+        viz_start_goal(screen, start, goal)
         screen.addstr(current.y, current.x, "x", curses.color_pair(Color.MAGENTA))
-        screen.addstr(start.y, start.x, "S", curses.color_pair(Color.GREEN))
-        screen.addstr(goal.y, goal.x, "G", curses.color_pair(Color.GREEN))
-        try:
-            k = screen.getkey()
-            if k == "r":
-                screen.nodelay(True)
-            if k == "s":
-                screen.nodelay(False)
-        except (TypeError, curses.error):
-            time.sleep(0.01)
+        animate(screen)
 
         if current == goal:
             break
@@ -64,17 +62,26 @@ def bfs_viz(screen: curses.window, start: Point2, goal: Point2, grid: Grid2) -> 
                 visited.add(adjacent)
                 open.append(adjacent)
                 predecessors[adjacent] = current
+                viz_predecessors(screen, predecessors)
+                viz_open(screen, open)
+                viz_open_collection(screen, open, grid.width + 1)
+                viz_start_goal(screen, start, goal)
+                screen.addstr(current.y, current.x, "x", curses.color_pair(Color.MAGENTA))
+                screen.addstr(adjacent.y, adjacent.x, "x", curses.color_pair(Color.CYAN))
+                animate(screen)
 
     path = reconstruct_path(goal, predecessors)
 
-    screen.nodelay(False)
-    for p in path:
-        screen.addstr(p.y, p.x, "p", curses.color_pair(5))
-    screen.getkey()
+    screen.addstr(
+        grid.height + 1,
+        0,
+        f"path length: {len(path) - 1}, closed states: {len(predecessors)}, open states: {len(open)}",
+    )
+    viz_path(screen, path)
     return path
 
 
 if __name__ == "__main__":
-    _grid, _start, _goal = parse_problem("aoc_python/colloquium/problem_0")
+    _grid, _start, _goal = parse_grid_problem("aoc_python/colloquium/problem_0")
     _path = curses.wrapper(bfs_viz, _start, _goal, _grid)
     print(f"{len(_path)=}")
