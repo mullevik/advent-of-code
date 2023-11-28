@@ -1,7 +1,10 @@
 import curses
 import time
-from typing import Any, Iterable
-from aoc_python.utils import Color, Grid2, Point2, load_stripped_lines
+import math
+from typing import Any
+from aoc_python.utils import Color, Grid2, Point2, load_stripped_lines, brehemsen_line
+
+ALPHABET = "ABCDEFGHIJK"
 
 
 def parse_grid_problem(path: str) -> tuple[Grid2, Point2, Point2]:
@@ -91,3 +94,40 @@ def animate(screen: curses.window, delay: float = 0.01) -> None:
             screen.nodelay(False)
     except (TypeError, curses.error):
         time.sleep(delay)
+
+
+def render_network(screen: curses.window, vertices: list[Point2], distance_matrix: list[list[float]]) -> None:
+    visited: set[frozenset[int]] = set()
+    for i, row in enumerate(distance_matrix):
+        for j, d in enumerate(row):
+
+            if math.isinf(d):
+                continue
+
+            if {i, j} in visited:
+                continue
+            visited.add(frozenset({i, j}))
+
+            line = brehemsen_line(vertices[i], vertices[j])
+
+            for p in line:
+                screen.addstr(p.y, p.x, ".")
+
+            mid_point = line[len(line) // 2] if len(line) > 0 else vertices[i]
+            screen.addstr(mid_point.y, mid_point.x, f"{d:.0f}")
+
+    for i, v in enumerate(vertices):
+        screen.addstr(v.y, v.x, ALPHABET[i])
+
+
+def build_distance_matrix(vertices: list[Point2], edges: dict[tuple[int, int], int]) -> list[list[float]]:
+    distances = [[float("inf") for _ in range(len(vertices))] for _ in range(len(vertices))]
+    print(distances)
+    for i, v in enumerate(vertices):
+        for j, u in enumerate(vertices):
+            if i == j:
+                distances[i][j] = 0.0
+            if (i, j) in edges:
+                distances[i][j] = float(edges[(i, j)])
+
+    return distances

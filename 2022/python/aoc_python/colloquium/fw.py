@@ -2,19 +2,8 @@ import copy
 import curses
 import time
 import math
-from aoc_python.colloquium import (
-    animate,
-    parse_general_problem,
-    reconstruct_path,
-    viz_open,
-    viz_open_collection,
-    viz_path,
-    viz_predecessors,
-    viz_start_goal,
-)
-from aoc_python.utils import Grid2, Point2, initialize_curses_colors, Color, euclidean_distance, brehemsen_line
-
-ALPHABET = "ABCDEFGHIJK"
+from aoc_python.colloquium import animate, parse_general_problem, render_network, build_distance_matrix, ALPHABET
+from aoc_python.utils import Point2, initialize_curses_colors, Color
 
 
 def fw(vertices, distance_matrix):
@@ -39,7 +28,7 @@ def fw_viz(screen: curses.window, vertices: list[Point2], distance_matrix: list[
         for i in range(0, len(vertices)):
             for j in range(0, len(vertices)):
                 render_network(screen, vertices, distance_matrix)
-                screen.addstr(0, 30, f"{ALPHABET[i]} to {ALPHABET[j]} through {ALPHABET[k]}")
+                screen.addstr(0, 30, f"{ALPHABET[i]} to {ALPHABET[j]} using shortest path to {ALPHABET[k]}")
                 screen.clrtoeol()
                 screen.addstr(1, 30, f"is {distances[i][j]} > ({distances[i][k]} + {distances[k][j]})?")
                 screen.clrtoeol()
@@ -53,21 +42,8 @@ def fw_viz(screen: curses.window, vertices: list[Point2], distance_matrix: list[
                     screen.addstr(i + 2, j * 4 + 2, render_float(distances[i][j]), curses.color_pair(Color.YELLOW))
                     animate(screen)
                     distances[i][j] = distances[i][k] + distances[k][j]
-                    screen.addstr(i + 2, j * 4 + 2, render_float(distances[i][j]))
+                    screen.addstr(i + 2, j * 4 + 2, render_float(distances[i][j]), curses.color_pair(Color.GREEN))
                     animate(screen)
-
-
-def build_distance_matrix(vertices: list[Point2], edges: dict[tuple[int, int], int]) -> list[list[float]]:
-    distances = [[float("inf") for _ in range(len(vertices))] for _ in range(len(vertices))]
-    print(distances)
-    for i, v in enumerate(vertices):
-        for j, u in enumerate(vertices):
-            if i == j:
-                distances[i][j] = 0.0
-            if (i, j) in edges:
-                distances[i][j] = float(edges[(i, j)])
-
-    return distances
 
 
 def render_float(f: float) -> str:
@@ -85,30 +61,6 @@ def render_distance_matrix(screen: curses.window, distance_matrix: list[list[flo
     for row_idx, row in enumerate(distance_matrix):
         row_str = "|".join([render_float(d) for d in row])
         screen.addstr(row_idx + 2, 0, f"{ALPHABET[row_idx]}|{row_str}")
-
-
-def render_network(screen: curses.window, vertices: list[Point2], distance_matrix: list[list[float]]) -> None:
-    visited: set[frozenset[int]] = set()
-    for i, row in enumerate(distance_matrix):
-        for j, d in enumerate(row):
-
-            if math.isinf(d):
-                continue
-
-            if {i, j} in visited:
-                continue
-            visited.add(frozenset({i, j}))
-
-            line = brehemsen_line(vertices[i], vertices[j])
-
-            for p in line:
-                screen.addstr(p.y, p.x, ".")
-
-            mid_point = line[len(line) // 2] if len(line) > 0 else vertices[i]
-            screen.addstr(mid_point.y, mid_point.x, f"{d:.0f}")
-
-    for i, v in enumerate(vertices):
-        screen.addstr(v.y, v.x, ALPHABET[i])
 
 
 if __name__ == "__main__":
