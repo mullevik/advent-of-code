@@ -236,9 +236,9 @@ A path
 
 $$ P = (v_1, v_2, ..., v_n) $$
 
-$$ v_i \in V \mid \forall i \in \{1, ..., n\} $$
+$$ v_i \in V $$
 
-$$ (v_i, v_{i+1}) \in E \mid \forall i \in \{1, ..., n\} $$
+$$ (v_i, v_{i+1}) \in E $$
 
 $$ i \neq j \mid \forall i,j \in \{1, ..., n\}   $$
 
@@ -441,7 +441,7 @@ Consistency
 
 $$ h(v_g) = 0 $$
 
-$$ h(v_s) \le w((v_p, v_s)) + h(v_s) $$
+$$ h(v_s) \le w((v_p, v_s)) + h(v_p) $$
 
 ---
 
