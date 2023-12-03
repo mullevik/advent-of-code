@@ -21,4 +21,7 @@
     "files.autoSave": "off",
     "editor.formatOnSave": true,
     "python.linting.flake8Enabled": false,
+    "cSpell.words": [
+        "brehemsen"
+    ],
 }

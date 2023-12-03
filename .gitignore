@@ -1,5 +1,8 @@
 2022/python/inputs
 2022/rust/inputs
+2023/rust/src/inputs
 __pycache__/
 */__pycache__/
 target
+.obsidian/
+
