@@ -21,47 +21,34 @@ fn _find_substring(text: &str, substring: &str, success_value: char) -> Option<c
     }
 }
 
-#[derive(PartialEq, Debug)]
-struct ParsingResult {
-    digit_char: char,
-    shift: usize,
-}
-
 static DIGIT_WORDS: &'static [&'static str] = &["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
 
-fn parse_digit(text: &str) -> Option<ParsingResult> {
+fn parse_digit(text: &str) -> Option<char> {
 
     if text.chars().next()?.is_numeric() {
-        return Some(ParsingResult{digit_char: text.chars().next().unwrap(), shift: 1})
+        return Some(text.chars().next().unwrap())
     }
 
     
     for (i, word) in DIGIT_WORDS.iter().enumerate() {
-        let _match = _find_substring(text, *word, char::from_digit((i + 1) as u32, 10).unwrap());
-        match _match  {
-            Some(c) => return Some(ParsingResult { digit_char: c, shift: word.len()}),
-            None => {}
+        if text.starts_with(word) {
+            return char::from_digit((i + 1) as u32, 10)
         }
     }
     None
 }
 
 fn get_digits_from_words(line: &str) -> String {
-    let mut digit_chars: Vec<char> = vec![];
-
-    let n = line.len();
+    let mut digit_chars = vec![];
     let mut line_index = 0;
-    while line_index < n {
-        let rest = &line[line_index..n];
+
+    while line_index < line.len() {
+        let rest = &line[line_index..line.len()];
         match parse_digit(rest) {
-            Some(r) => {
-                digit_chars.push(r.digit_char);
-                line_index += r.shift;
-            },
-            None => {
-                line_index += 1;
-            }
-        }        
+            Some(c) => digit_chars.push(c),
+            None => ()
+        }
+        line_index += 1;
     }
 
     digit_chars.iter().collect()
@@ -83,11 +70,11 @@ pub fn second_part() -> i32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::day_01::{parse_digit, ParsingResult, first_part, second_part};
+    use crate::day_01::{parse_digit, first_part, second_part};
 
     #[test]
     fn test_parse_digit() {
-        assert_eq!(parse_digit("one"), Some(ParsingResult{digit_char: '1', shift: 3}));
+        assert_eq!(parse_digit("one"), Some('1'));
     }
 
     #[test]
