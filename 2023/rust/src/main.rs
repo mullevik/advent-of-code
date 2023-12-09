@@ -14,8 +14,10 @@ fn main() {
     // println!("{solution}");
     // let solution = day_07::first_part(include_str!("inputs/07.secret"));
     // println!("{solution}");
+    let solution = day_07::second_part(include_str!("inputs/07.secret"));
+    println!("{solution}");
     // let solution = day_09::first_part(include_str!("inputs/09.secret"));
     // println!("{solution}");
-    let solution = day_09::second_part(include_str!("inputs/09.secret"));
-    println!("{solution}");
+    // let solution = day_09::second_part(include_str!("inputs/09.secret"));
+    // println!("{solution}");
 }
