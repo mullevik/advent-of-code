@@ -25,7 +25,8 @@ fn main() {
     // let solution = day_10::first_part(include_str!("inputs/10.secret"));
     // let solution = day_10::second_part(include_str!("inputs/10.secret"));
     // println!("{solution}");
-    let solution = day_19::first_part(include_str!("inputs/19.secret"));
+    // let solution = day_19::first_part(include_str!("inputs/19.secret"));
+    let solution = day_19::second_part(include_str!("inputs/19.secret"));
     println!("{solution}");
     
 }

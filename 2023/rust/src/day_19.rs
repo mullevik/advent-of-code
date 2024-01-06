@@ -1,6 +1,6 @@
-use std::unimplemented;
+use std::{unimplemented, collections::{HashMap, HashSet}};
 
-use itertools::Itertools;
+use itertools::{Itertools, cloned};
 
 #[derive(Clone, Copy, Debug)]
 enum PartType {
@@ -22,6 +22,7 @@ impl PartType {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
 enum Operator {
     LT,
     GT,
@@ -33,6 +34,13 @@ impl Operator {
             ">" => Operator::GT,
             "<" => Operator::LT,
             _ => panic!("Unknown operator {text:?}")
+        }
+    }
+
+    fn cmp(&self, lhs: i64, rhs: i64) -> bool {
+        match self {
+            Operator::GT => lhs > rhs,
+            Operator::LT => lhs < rhs
         }
     }
 }
@@ -65,6 +73,7 @@ impl Part {
     }
 }
 
+#[derive(Clone, Debug)]
 struct Decider {
     subject: PartType,
     operator: Operator,
@@ -98,6 +107,7 @@ impl Decider {
     }
 }
 
+#[derive(Clone, Debug)]
 struct Rule {
     name: String,
     deciders: Vec<Decider>,
@@ -123,6 +133,31 @@ impl Rule {
             fallback_destination: fallback.to_string()
         }
     }
+
+    fn apply(&self, part: &Part) -> String {
+        let matched_deciders = self.deciders
+        .iter()
+        .filter(|d| match d.subject {
+            PartType::X => d.operator.cmp(part.values[0], d.value),
+            PartType::M => d.operator.cmp(part.values[1], d.value),
+            PartType::A => d.operator.cmp(part.values[2], d.value),
+            PartType::S => d.operator.cmp(part.values[3], d.value),
+        })
+        .take(1)
+        .collect::<Vec<&Decider>>();
+
+        if matched_deciders.is_empty() {
+            print!("(fall)");
+            return self.fallback_destination.clone()
+        }
+        let _first = matched_deciders
+        .first()
+        .unwrap();
+        let _first_subject = _first.subject;
+        print!("({_first_subject:?})");
+        _first.destination
+        .clone()
+    }
 }
 
 
@@ -133,26 +168,114 @@ fn parse_input(text: &str) -> (Vec<Rule>, Vec<Part>) {
     (_rules, _parts)
 }
 
-fn is_accepted(part: Part, rules: &Vec<Rule>) -> bool {
-    unimplemented!()
+fn is_accepted(part: &Part, rules: &HashMap<String, &Rule>) -> bool {
+    let in_rule = rules.get("in").unwrap();
+    println!("Accepting {part:?}");
+
+    let mut destination = in_rule.apply(part);
+    
+    let terminal_destinations = ["A", "R"];
+
+    while ! terminal_destinations.contains(&destination.as_str()) {
+        print!("{destination:?} -> ");
+        destination = rules.get(&destination).unwrap().apply(part);
+    }
+    println!("{destination:?}");
+    match destination.as_str() {
+        "A" => true,
+        "R" => false,
+        _ => panic!("Invalid terminal destination {destination:?}")
+    }
 }
 
 
-pub fn first_part(input: &str) -> i32 {
+pub fn first_part(input: &str) -> i64 {
     let (rules, parts) = parse_input(input);
+    let rules_map: HashMap<String, &Rule> = rules
+    .iter()
+    .map(|r| (r.name.clone(), r))
+    .collect();
 
-    unimplemented!();
-    // let accepted_parts: Vec<Part> = parts.iter()
-    // .filter(|p| is_accepted(p, &rules))
-    // .collect();
+    println!("{rules_map:?}");
 
-    // accepted_parts.iter()
-    // .map(|p| p.sum())
-    // .sum()
+    let accepted_parts: Vec<&Part> = parts
+    .iter()
+    .filter(|p| is_accepted(p, &rules_map))
+    .collect();
+
+    accepted_parts.iter()
+    .map(|p| p.sum())
+    .sum()
 }
 
-pub fn second_part(input: &str) -> i32 {
-    return -1;
+type ProductOptions = [HashSet<u16>; 4];
+
+fn bound_options(decider: &Decider, option_index: i32, options: ProductOptions) -> (ProductOptions, ProductOptions) {
+    let option = options.get(option_index as usize).unwrap();
+    let filtered_option: HashSet<u16> = option.iter().filter(|v| decider.operator.cmp(**v as i64, decider.value)).cloned().collect();
+    let inverse_option: HashSet<u16> = option.difference(&filtered_option).cloned().collect();
+    if option_index == 0 {
+        return ([filtered_option, options[1].clone(), options[2].clone(), options[3].clone()], [inverse_option, options[1].clone(), options[2].clone(), options[3].clone()]);
+    } else if option_index == 1 {
+        return ([options[0].clone(), filtered_option, options[2].clone(), options[3].clone()], [options[0].clone(), inverse_option, options[2].clone(), options[3].clone()]);  
+    } else if option_index == 2 {
+        return ([options[0].clone(), options[1].clone(), filtered_option, options[3].clone()], [options[0].clone(), options[1].clone(), inverse_option, options[3].clone()]);  
+    } else if option_index == 3 {
+        return ([options[0].clone(), options[1].clone(), options[2].clone(), filtered_option], [options[0].clone(), options[1].clone(), options[2].clone(), inverse_option]);  
+    } else {
+        panic!("Something unexpected");
+    }
+}
+
+fn collect_combinations(rules_map: &HashMap<String, &Rule>, current: String, options: ProductOptions) -> i64 {
+
+    if current == "A" {
+        let prod = options.iter().map(|x| x.len() as i64).product();
+        return prod;
+    }
+
+    if current == "R" {
+        return 0;
+    }
+
+    let rule = rules_map.get(&current).unwrap();
+
+    let mut fallback_options = options;
+    let mut accumulator = 0;
+    for d in rule.deciders.iter() {
+        let (bounded_options_happy, bounded_options_unhappy) = match d.subject {
+            PartType::X => {
+                bound_options(d, 0, fallback_options)
+            },
+            PartType::M => {
+                bound_options(d, 1, fallback_options)
+            },
+            PartType::A => {
+                bound_options(d, 2, fallback_options)
+            },
+            PartType::S => {
+                bound_options(d, 3, fallback_options)
+            },
+        };
+        fallback_options = bounded_options_unhappy;
+        accumulator += collect_combinations(rules_map, d.destination.clone(), bounded_options_happy);
+    }
+
+    accumulator += collect_combinations(rules_map, rule.fallback_destination.clone(), fallback_options);
+    accumulator
+}
+
+
+pub fn second_part(input: &str) -> i64 {
+    let (rules, parts) = parse_input(input);
+    let rules_map: HashMap<String, &Rule> = rules
+    .iter()
+    .map(|r| (r.name.clone(), r))
+    .collect();
+
+    let options: [HashSet<u16>;4] = [(1..4001).collect(), (1..4001).collect(), (1..4001).collect(), (1..4001).collect()];
+
+    collect_combinations(&rules_map, "in".to_string(), options)
 }
 
 #[cfg(test)]
@@ -169,13 +292,14 @@ mod tests {
 
     #[test]
     fn test_example() {
-        assert_eq!(first_part(include_str!("inputs/19_example_1.txt")), 0);
+        assert_eq!(first_part(include_str!("inputs/19_example_1.txt")), 19114);
+        assert_eq!(second_part(include_str!("inputs/19_example_1.txt")), 167409079868000i64);
     }
     
     #[test]
     fn test_parts() {
-        unimplemented!();
-        // assert_eq!(first_part(include_str!("inputs/19.secret")), 0);
-        // assert_eq!(second_part(include_str!("inputs/19.secret")), 0);
+        // unimplemented!();
+        assert_eq!(first_part(include_str!("inputs/19.secret")), 472630);
+        assert_eq!(second_part(include_str!("inputs/19.secret")), 116738260946855);
     }
 }
