@@ -4,7 +4,10 @@ mod day_07;
 mod day_06;
 mod day_02;
 mod day_01;
+mod day_17;
+mod day_18;
 mod day_19;
+mod day_20;
 
 fn main() {
     // let solution = day_01::first_part();
@@ -25,8 +28,14 @@ fn main() {
     // let solution = day_10::first_part(include_str!("inputs/10.secret"));
     // let solution = day_10::second_part(include_str!("inputs/10.secret"));
     // println!("{solution}");
-    // let solution = day_19::first_part(include_str!("inputs/19.secret"));
-    let solution = day_19::second_part(include_str!("inputs/19.secret"));
+    let solution = day_17::first_part(include_str!("inputs/17.secret"));
     println!("{solution}");
-    
+    // let solution = day_18::first_part(include_str!("inputs/18.secret"));
+    // println!("{solution}");
+    // let solution = day_19::first_part(include_str!("inputs/19.secret"));
+    // let solution = day_19::second_part(include_str!("inputs/19.secret"))
+    // println!("{solution}");
+    // let solution = day_20::first_part(include_str!("inputs/20.secret"));
+    // let solution = day_20::second_part(include_str!("inputs/20.secret"));
+    // println!("{solution}");
 }
