@@ -90,9 +90,9 @@ mod tests {
         assert_eq!(second_part(include_str!("inputs/15_example_1.txt")), 145);
     }
     
-    // #[test]
-    // fn test_parts() {
-    //     assert_eq!(first_part(include_str!("inputs/15.secret")), 0);
-    //     assert_eq!(second_part(include_str!("inputs/15.secret")), 0);
-    // }
+    #[test]
+    fn test_parts() {
+        assert_eq!(first_part(include_str!("inputs/15.secret")), 515495);
+        assert_eq!(second_part(include_str!("inputs/15.secret")), 229349);
+    }
 }
