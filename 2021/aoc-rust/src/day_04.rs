@@ -1,6 +1,3 @@
-use core::time;
-use std::thread;
-
 use rayon::iter::{
     IndexedParallelIterator, IntoParallelRefMutIterator, ParallelBridge, ParallelIterator,
 };
@@ -73,12 +70,12 @@ fn apply_number_to_all(number: i32, boards: &[Vec<i32>], masks: &mut [Vec<bool>]
                     mask[idx] = true;
                 }
             });
-            // thread::sleep(time::Duration::from_micros(10));
+            // thread::sleep(time::Duration::from_micros(500));
         })
 }
 
 fn is_board_winning(mask: &[bool]) -> bool {
-    // thread::sleep(time::Duration::from_micros(10));
+    // thread::sleep(time::Duration::from_micros(500));
     (0..BOARD_WIDTH).any(|col| (0..BOARD_HEIGHT).all(|row| mask[(row * 5) + col]))
         || (0..BOARD_HEIGHT).any(|row| (0..BOARD_WIDTH).all(|col| mask[(row * 5) + col]))
 }

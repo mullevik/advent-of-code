@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 clippy = "0.0.302"
 rayon = "1.10.0"
+regex = "1.10.4"
+rustc-hash = "1.1.0"
