@@ -1,9 +1,10 @@
 use std::time::Instant;
                                                            
              
-
+mod utils;
 // mod day_04;
-mod day_05;
+// mod day_05;
+mod day_06;
 
 macro_rules! time_day {
     ($day_call:expr) => {
@@ -36,5 +37,7 @@ macro_rules! time_day {
 fn main() {
     // time_day!(day_04::first_part(include_str!("../inputs/04")), 10);
     // time_day!(day_05::first_part(include_str!("../inputs/05")));
-    time_day!(day_05::second_part(include_str!("../inputs/05")));
+    // time_day!(day_05::second_part(include_str!("../inputs/05")));
+    // time_day!(day_06::first_part(include_str!("../inputs/06")));
+    time_day!(day_06::second_part(include_str!("../inputs/06")));
 }

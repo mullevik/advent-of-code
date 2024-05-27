@@ -1,6 +1,9 @@
 use regex::Regex;
 use rustc_hash::FxHashMap;
 
+use crate::utils::sign;
+
+
 pub fn first_part(input: &str) -> i32 {
     let pairs = parse_pairs(input);
     let non_diagonal_pairs = pairs
@@ -66,33 +69,9 @@ impl Iterator for LineIterator {
 }
 
 fn generate_line(a: (i32, i32), b: (i32, i32)) -> impl Iterator<Item = (i32, i32)> {
-    let direction = {
-        if a.0 == b.0 {
-            if a.1 > b.1 {
-                (0, -1)
-            } else {
-                (0, 1)
-            }
-        } else if a.1 == b.1 {
-            if a.0 > b.0 {
-                (-1, 0)
-            } else {
-                (1, 0)
-            }
-        } else if a.0 < b.0 && a.1 < b.1 {
-            (1, 1)
-        } else if a.0 > b.0 && a.1 > b.1 {
-            (-1, -1)
-        } else if a.0 < b.0 && a.1 > b.1 {
-            (1, -1)
-        } else if a.0 > b.0 && a.1 < b.1 {
-            (-1, 1)
-        } else {
-            (0, 0)
-        }
-    };
-
-    LineIterator::new(a, b, direction)
+    let dx = -sign(a.0 - b.0);
+    let dy = -sign(a.1 - b.1);
+    LineIterator::new(a, b, (dx, dy))
 }
 
 fn parse_pairs(input: &str) -> Vec<((i32, i32), (i32, i32))> {
