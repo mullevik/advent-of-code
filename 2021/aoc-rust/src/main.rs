@@ -1,43 +1,13 @@
-use std::time::Instant;
-                                                           
-             
-mod utils;
-// mod day_04;
-// mod day_05;
+mod day_04;
+mod day_05;
 mod day_06;
+mod day_07;
+mod utils;
+mod benchmark;
 
-macro_rules! time_day {
-    ($day_call:expr) => {
-        let start = Instant::now();
-        let output = $day_call;
-        let duration = start.elapsed();
-        println!("{}", output);
-        println!("Took {:?} (real time)", duration);
-    };
-    ($day_call:expr, $repeats: literal) => {
-        let total: Duration = (0..$repeats)
-        .map(|iteration| {
-            let start = Instant::now();
-            let output = $day_call;
-            let duration = start.elapsed();
-            if iteration == 0 {
-                println!("{}", output);
-                print!("Repeating runs: ");
-            }
-            print!(".");
-            io::stdout().flush().ok().expect("Could not flush stdout");
-            duration
-        })
-        .sum();
-        println!("\nTook {:?} (real time on average from {} executions)", total / $repeats, $repeats);
-    };
-}
-
+use crate::benchmark::{benchmark_run, print_day, print_header};
 
 fn main() {
-    // time_day!(day_04::first_part(include_str!("../inputs/04")), 10);
-    // time_day!(day_05::first_part(include_str!("../inputs/05")));
-    // time_day!(day_05::second_part(include_str!("../inputs/05")));
-    // time_day!(day_06::first_part(include_str!("../inputs/06")));
-    time_day!(day_06::second_part(include_str!("../inputs/06")));
+
+    benchmark_all!(day_04, day_05, day_06, day_07)
 }
