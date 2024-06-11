@@ -1,27 +1,69 @@
-use std::i64;
+use std::{
+    cmp::{max, min},
+    i64,
+};
 
-pub fn first_part(input: &str) -> i64 {
+use crate::utils::sign;
+
+pub fn first_part(input: &str) -> i32 {
     let crab_positions = parse_input(input);
-    solve_iteratively(&crab_positions, difference_distance)
+    // solve_iteratively(&crab_positions, difference_distance)
+    solve_with_gradient_descent(&crab_positions, difference_distance)
 }
-pub fn second_part(input: &str) -> i64 {
+pub fn second_part(input: &str) -> i32 {
     let crab_positions = parse_input(input);
-    solve_iteratively(&crab_positions, arithmetic_distance)
+    solve_with_gradient_descent(&crab_positions, arithmetic_distance)
+    // solve_iteratively(&crab_positions, arithmetic_distance)
 }
 
-fn solve_iteratively(crab_positions: &[i32], distance_fn: fn(i32, i32) -> i32) -> i64 {
+fn solve_iteratively(crab_positions: &[i32], distance_fn: fn(i32, i32) -> i32) -> i32 {
     let min_pos = *crab_positions.iter().min().unwrap();
     let max_pos = *crab_positions.iter().max().unwrap();
 
     (min_pos..=max_pos)
-        .map(|current_pos| {
-            crab_positions
-                .iter()
-                .map(|crab_pos| distance_fn(*crab_pos, current_pos) as i64)
-                .sum::<i64>()
-        })
+        .map(|current_pos| count_fuel(current_pos, crab_positions, distance_fn))
         .min()
         .unwrap()
+}
+
+fn solve_with_gradient_descent(crab_positions: &[i32], distance_fn: fn(i32, i32) -> i32) -> i32 {
+    let min_pos = *crab_positions.iter().min().unwrap();
+    let max_pos = *crab_positions.iter().max().unwrap();
+
+    let mut current_position = 0;
+    let mut step_size = max_pos - min_pos;
+    let mut total_min = i32::MAX;
+    let mut last_total_min_set = 0;
+    loop {
+        let f_0 = count_fuel(current_position, crab_positions, distance_fn);
+        let f_1 = count_fuel(current_position + 1, crab_positions, distance_fn);
+        let grad = f_0 - f_1;
+
+        if f_0 < total_min || f_1 < total_min {
+            total_min = min(f_0, f_1);
+        } else {
+            last_total_min_set += 1;
+        }
+
+        current_position = current_position + (sign(grad)) * step_size;
+        step_size = max(step_size / 2, 1);
+
+        if last_total_min_set > 10 {
+            break;
+        }
+    }
+    total_min
+}
+
+fn count_fuel(
+    current_position: i32,
+    crab_positions: &[i32],
+    distance_fn: fn(i32, i32) -> i32,
+) -> i32 {
+    crab_positions
+        .iter()
+        .map(|crab_position| distance_fn(*crab_position, current_position))
+        .sum::<i32>()
 }
 
 fn difference_distance(a: i32, b: i32) -> i32 {

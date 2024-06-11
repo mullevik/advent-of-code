@@ -1,9 +1,9 @@
 day       part 1    part 2                                                                     │
 ------------------------------                                                                 │
-day 04    1.089 ms  5.537 ms                                                                   │
-day 05    151.9 ms  157.0 ms                                                                   │
-day 06    0.017 ms  0.055 ms                                                                   │
-day 07    3.411 ms  3.417 ms
+day 04    0.936 ms  5.154 ms                                                                   │
+day 05    133.4 ms  136.5 ms                                                                   │
+day 06    0.014 ms  0.047 ms                                                                   │
+day 07    0.043 ms  0.048 ms
 
 
 ## Daily notes
