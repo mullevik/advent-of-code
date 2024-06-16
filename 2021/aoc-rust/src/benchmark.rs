@@ -51,7 +51,7 @@ macro_rules! benchmark_all {
         print_header();
         $(
         let day_number_string = &stringify!($day).to_string()[4..];
-        let input_path = format!("inputs/{}", day_number_string);
+        let input_path = format!("inputs/{}.in", day_number_string);
         let error_msg = format!("Unable to open input file {}", &input_path);
         let raw_input = std::fs::read_to_string(&input_path).expect(error_msg.as_str());
 

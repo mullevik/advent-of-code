@@ -1,5 +1,5 @@
 use core::panic;
-use std::{char, collections::HashSet, default, ops::Deref, usize};
+use std::collections::HashSet;
 
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
@@ -84,11 +84,11 @@ fn backtrack(
         && problem
             .signal_patterns
             .iter()
-            .all(|p| matches!(try_map_digit(candidates, p), Some(i64)))
+            .all(|p| try_map_digit(candidates, p).is_some())
         && problem
             .output_patterns
             .iter()
-            .all(|p| matches!(try_map_digit(candidates, p), Some(i64)))
+            .all(|p| try_map_digit(candidates, p).is_some())
     {
         return Some(candidates.to_vec());
     }
@@ -254,7 +254,7 @@ mod test_day_08 {
 
     #[test]
     fn test_first_part() {
-        assert_eq!(first_part(include_str!("../inputs/08")), 493);
+        assert_eq!(first_part(include_str!("../inputs/08.in")), 493);
     }
 
     #[test]
@@ -309,6 +309,6 @@ mod test_day_08 {
     }
     #[test]
     fn test_second_part() {
-        assert_eq!(second_part(include_str!("../inputs/08")), 1010460);
+        assert_eq!(second_part(include_str!("../inputs/08.in")), 1010460);
     }
 }

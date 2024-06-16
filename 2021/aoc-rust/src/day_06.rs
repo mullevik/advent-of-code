@@ -81,11 +81,11 @@ mod tests {
 
     #[test]
     fn test_first_part() {
-        assert_eq!(first_part(include_str!("../inputs/06")), 387413);
+        assert_eq!(first_part(include_str!("../inputs/06.in")), 387413);
     }
 
     #[test]
     fn test_second_part() {
-        assert_eq!(second_part(include_str!("../inputs/06")), 1738377086345);
+        assert_eq!(second_part(include_str!("../inputs/06.in")), 1738377086345);
     }
 }

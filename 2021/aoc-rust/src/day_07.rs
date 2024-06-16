@@ -84,7 +84,7 @@ mod test_day_07 {
 
     #[test]
     fn test_first_part() {
-        assert_eq!(first_part(include_str!("../inputs/07")), 343468);
+        assert_eq!(first_part(include_str!("../inputs/07.in")), 343468);
     }
 
     #[test]
@@ -94,6 +94,6 @@ mod test_day_07 {
 
     #[test]
     fn test_second_part() {
-        assert_eq!(second_part(include_str!("../inputs/07")), 96086265);
+        assert_eq!(second_part(include_str!("../inputs/07.in")), 96086265);
     }
 }
