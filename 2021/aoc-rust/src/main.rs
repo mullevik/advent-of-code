@@ -5,6 +5,7 @@ mod day_07;
 mod day_08;
 mod utils;
 mod benchmark;
+mod grid;
 
 use crate::benchmark::{benchmark_run, print_day, print_header};
 
