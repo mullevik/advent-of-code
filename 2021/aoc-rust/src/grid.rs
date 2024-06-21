@@ -106,6 +106,13 @@ impl<T> fmt::Debug for Grid<T> {
     }
 }
 
+impl<T> FromIterator<Vec<T>> for Grid<T> {
+
+    fn from_iter<M: IntoIterator<Item = Vec<T>>>(iter: M) -> Self {
+       Self::from_rows(iter.into_iter()).unwrap()
+    }
+}
+
 pub struct GridPointIterator<'a, T> {
     index: usize,
     grid: &'a Grid<T>,
@@ -162,8 +169,7 @@ mod tests_grid {
     fn test_access() {
         let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
 
-        let g = Grid::from_rows(rows.iter().cloned()).unwrap();
-
+        let g = rows.iter().cloned().collect::<Grid<_>>();
         assert_eq!(g.at_xy(0, 0).unwrap(), &1);
         assert_eq!(g.at_xy(100, 100).err().unwrap(), GridError::AccessError);
         assert_eq!(

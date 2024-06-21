@@ -1,11 +1,12 @@
 ```
 day       part 1    part 2    
 ------------------------------
-day 04    0.866 ms  4.864 ms  
-day 05    133.5 ms  135.9 ms  
-day 06    0.014 ms  0.048 ms  
-day 07    0.037 ms  0.040 ms  
-day 08    0.741 ms  1.445 ms  
+day 04    0.884 ms  4.856 ms  
+day 05    124.5 ms  127.3 ms  
+day 06    0.013 ms  0.044 ms  
+day 07    0.035 ms  0.038 ms  
+day 08    0.721 ms  1.426 ms  
+day 09    0.868 ms  2.533 ms  
 ```
 
 ## Daily notes
@@ -39,4 +40,10 @@ Convex optimization problem with bisect search.
 Constraint satisfaction problem.
 
 Solved by backpropagation.
+
+### 09
+
+DFS with connected-components.
+
+Using custom grid implementation.
 

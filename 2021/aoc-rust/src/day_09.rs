@@ -41,7 +41,7 @@ pub fn second_part(input: &str) -> i32 {
 
                 if let Some(ad_basin_id) = basin_ids.get(&ad_p) {
                     if *ad_basin_id != current_basin_id {
-                        let dummy = *ad_basin_id;  // ask: why can't I put this into the argument
+                        let dummy = *ad_basin_id; // ask: why can't I put this into the argument
                         re_assign_basin(&mut basin_ids, dummy, current_basin_id);
                     }
                 } else {
@@ -68,11 +68,7 @@ fn multiply_top_three_basins(basin_ids: &FxHashMap<Point, usize>) -> i32 {
     let mut sizes: Vec<usize> = counter.iter().map(|(k, v)| *v).collect::<Vec<_>>();
 
     sizes.sort();
-    sizes
-        .iter()
-        .rev()
-        .take(3)
-        .product::<usize>() as i32
+    sizes.iter().rev().take(3).product::<usize>() as i32
 }
 
 fn re_assign_basin(basin_ids: &mut FxHashMap<Point, usize>, from: usize, to: usize) {
@@ -92,17 +88,15 @@ fn is_local_minimum(p: &Point, g: &Grid<i32>) -> bool {
 }
 
 fn parse(input: &str) -> Grid<i32> {
-    Grid::from_rows(
-        input
-            .split('\n')
-            .filter(|line| !line.is_empty())
-            .map(|line| {
-                line.chars()
-                    .map(|c| c.to_string().parse::<i32>().unwrap())
-                    .collect::<Vec<_>>()
-            }),
-    )
-    .unwrap()
+    input
+        .split('\n')
+        .filter(|line| !line.is_empty())
+        .map(|line| {
+            line.chars()
+                .map(|c| c.to_string().parse::<i32>().unwrap())
+                .collect::<Vec<_>>()
+        })
+        .collect::<Grid<_>>()
 }
 
 mod tests_day_09 {
