@@ -1,28 +1,28 @@
 use core::fmt;
-use std::usize;
+use std::{cmp::max, usize};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-enum GridError {
+pub enum GridError {
     DimensionError,
     AccessError,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Point {
-    x: usize,
-    y: usize,
+    x: i32,
+    y: i32,
 }
 impl Point {
-    fn new(x: usize, y: usize) -> Self {
+    fn new(x: i32, y: i32) -> Self {
         Self { x, y }
     }
 }
 
-struct Grid<T> {
+pub struct Grid<T> {
     positions: Vec<Vec<T>>,
 }
 impl<T> Grid<T> {
-    fn from_rows(rows: impl Iterator<Item = Vec<T>>) -> Result<Self, GridError> {
+    pub fn from_rows(rows: impl Iterator<Item = Vec<T>>) -> Result<Self, GridError> {
         let collected_rows = rows.collect::<Vec<_>>();
 
         if !are_same_length(&collected_rows) {
@@ -34,11 +34,11 @@ impl<T> Grid<T> {
         }
     }
 
-    fn height(&self) -> usize {
+    pub fn height(&self) -> usize {
         self.positions.len()
     }
 
-    fn width(&self) -> usize {
+    pub fn width(&self) -> usize {
         if self.positions.is_empty() {
             0
         } else {
@@ -46,30 +46,30 @@ impl<T> Grid<T> {
         }
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.height() * self.width()
     }
 
-    fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
-    fn contains(&self, p: &Point) -> bool {
-        p.x < self.width() && p.y < self.height()
+    pub fn contains(&self, p: &Point) -> bool {
+        (p.x >= 0 && (max(p.x, 0) as usize) < self.width()) && (p.y >= 0 && (max(p.y, 0) as usize) < self.height())
     }
 
-    fn at(&self, p: &Point) -> Result<&T, GridError> {
+    pub fn at(&self, p: &Point) -> Result<&T, GridError> {
         if self.contains(p) {
-            Ok(&self.positions[p.y][p.x])
+            Ok(&self.positions[p.y as usize][p.x as usize])
         } else {
             Err(GridError::AccessError)
         }
     }
-    fn at_xy(&self, x: usize, y: usize) -> Result<&T, GridError> {
-        self.at(&Point::new(x, y))
+    pub fn at_xy(&self, x: usize, y: usize) -> Result<&T, GridError> {
+        self.at(&Point::new(x as i32, y as i32))
     }
 
-    fn four_neighborhood_at(&self, p: &Point) -> Vec<&T> {
+    pub fn four_neighborhood_at(&self, p: &Point) -> Vec<&T> {
         [
             Point::new(p.x - 1, p.y),
             Point::new(p.x + 1, p.y),
@@ -81,19 +81,19 @@ impl<T> Grid<T> {
         .filter_map(|_p| _p.ok())
         .collect()
     }
-    fn four_neighborhood_at_xy(&self, x: usize, y: usize) -> Vec<&T> {
-        self.four_neighborhood_at(&Point::new(x, y))
+    pub fn four_neighborhood_at_xy(&self, x: usize, y: usize) -> Vec<&T> {
+        self.four_neighborhood_at(&Point::new(x as i32, y as i32))
     }
-    fn iter_points(&self) -> GridPointIterator<T> {
+    pub fn iter_points(&self) -> GridPointIterator<T> {
         GridPointIterator {
             index: 0,
             grid: self,
         }
     }
-    fn iter_values(&self) -> impl Iterator<Item = &T> {
+    pub fn iter_values(&self) -> impl Iterator<Item = &T> {
         self.iter_points().map(|p| self.at(&p).unwrap())
     }
-    fn iter(&self) -> impl Iterator<Item = (Point, &T)> {
+    pub fn iter(&self) -> impl Iterator<Item = (Point, &T)> {
         self.iter_points().map(|p| (p, self.at(&p).unwrap()))
     }
 }
@@ -104,7 +104,7 @@ impl<T> fmt::Debug for Grid<T> {
     }
 }
 
-struct GridPointIterator<'a, T> {
+pub struct GridPointIterator<'a, T> {
     index: usize,
     grid: &'a Grid<T>,
 }
@@ -117,8 +117,8 @@ impl<'a, T> Iterator for GridPointIterator<'a, T> {
             None
         } else {
             let current_position = Point::new(
-                self.index % self.grid.width(),
-                self.index / self.grid.width(),
+                (self.index % self.grid.width()) as i32,
+                (self.index / self.grid.width()) as i32,
             );
             println!("cp: {:?}", current_position);
             self.index += 1;
