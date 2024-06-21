@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{cmp::max, usize};
+use std::{cmp::max, ops::Deref, usize};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GridError {
@@ -7,7 +7,7 @@ pub enum GridError {
     AccessError,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Point {
     x: i32,
     y: i32,
@@ -69,7 +69,7 @@ impl<T> Grid<T> {
         self.at(&Point::new(x as i32, y as i32))
     }
 
-    pub fn four_neighborhood_at(&self, p: &Point) -> Vec<&T> {
+    pub fn four_neighborhood_at(&self, p: &Point) -> Vec<(Point, &T)> {
         [
             Point::new(p.x - 1, p.y),
             Point::new(p.x + 1, p.y),
@@ -77,11 +77,13 @@ impl<T> Grid<T> {
             Point::new(p.x, p.y + 1),
         ]
         .iter()
-        .map(|_p| self.at(_p))
-        .filter_map(|_p| _p.ok())
-        .collect()
+        .map(|_p| (_p, self.at(_p)))
+        .filter(|(_p, _v)| _v.is_ok())
+        .map(|(_p, _v)| (*_p, _v.unwrap()))
+        .collect::<Vec<_>>()
+
     }
-    pub fn four_neighborhood_at_xy(&self, x: usize, y: usize) -> Vec<&T> {
+    pub fn four_neighborhood_at_xy(&self, x: usize, y: usize) -> Vec<(Point, &T)> {
         self.four_neighborhood_at(&Point::new(x as i32, y as i32))
     }
     pub fn iter_points(&self) -> GridPointIterator<T> {
@@ -120,7 +122,6 @@ impl<'a, T> Iterator for GridPointIterator<'a, T> {
                 (self.index % self.grid.width()) as i32,
                 (self.index / self.grid.width()) as i32,
             );
-            println!("cp: {:?}", current_position);
             self.index += 1;
             Some(current_position)
         }
@@ -166,7 +167,7 @@ mod tests_grid {
         assert_eq!(g.at_xy(0, 0).unwrap(), &1);
         assert_eq!(g.at_xy(100, 100).err().unwrap(), GridError::AccessError);
         assert_eq!(
-            g.four_neighborhood_at_xy(1, 1),
+            g.four_neighborhood_at_xy(1, 1).iter().cloned().map(|(p, v)| v).collect::<Vec<_>>(),
             [4, 6, 2].iter().collect::<Vec<_>>()
         );
         assert_eq!(
