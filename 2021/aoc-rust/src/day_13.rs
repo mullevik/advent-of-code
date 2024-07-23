@@ -1,98 +1,77 @@
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
 use crate::grid::{Grid, Point};
 
 pub fn first_part(input: &str) -> i32 {
-    let (points, splits) = parse(input);
-
-    let mut paper_points: HashSet<Point> = points.iter().cloned().collect::<HashSet<_>>();
-
-    for split in &splits[0..1] {
-        paper_points = fold(&paper_points, split);
-    }
-
-    paper_points.len() as i32
+    let (points, folds) = parse(input);
+    points
+        .iter()
+        .map(|p| fold_point(p, &folds[0..1]))
+        .collect::<FxHashSet<Point>>()
+        .len() as i32
 }
 
-pub fn second_part(input: &str) -> i32 {
-    let (points, splits) = parse(input);
+pub fn second_part(input: &str) -> String {
+    let (points, folds) = parse(input);
 
-    let mut paper_points: HashSet<Point> = points.iter().cloned().collect::<HashSet<_>>();
-
-    for split in splits.iter() {
-        paper_points = fold(&paper_points, split);
-    }
+    let paper_points = points
+        .iter()
+        .map(|p| fold_point(p, &folds))
+        .collect::<FxHashSet<_>>();
 
     let max_x = paper_points.iter().map(|p| p.x).max().unwrap() + 1;
     let max_y = paper_points.iter().map(|p| p.y).max().unwrap() + 1;
-    let grid = Grid::from_rows(
-        (0..max_y)
-            .map(|_| vec!["."; max_x as usize])
-            .collect::<Vec<_>>()
-            .iter()
-            .cloned(),
-    )
-    .unwrap();
 
-    for p in grid.iter_points() {
-        if paper_points.contains(&p) {
-            print!("#");
-        } else {
-            print!(" ");
-        }
-        if p.x == grid.width() as i32 - 1 {
-            println!();
-        }
-    }
-
-    paper_points.len() as i32
-}
-
-fn fold(points: &HashSet<Point>, split: &Split) -> HashSet<Point> {
-    let mut addition: HashSet<Point> = HashSet::default();
-    let mut deletion: HashSet<Point> = HashSet::default();
-    if split.0 {
-        // x
-
-        for pp in points.iter() {
-            if pp.x > split.1 {
-                deletion.insert(*pp);
-                let diff = pp.x - split.1;
-                let new_x = split.1 - diff;
-                addition.insert(Point::new(new_x, pp.y));
+    let mut out: String = "".to_string();
+    for y in 0..max_y {
+        for x in 0..max_x {
+            if paper_points.contains(&Point::new(x, y)) {
+                out += "#";
+            } else {
+                out += " ";
             }
         }
-    } else {
-        // y
-        for pp in points.iter() {
-            if pp.y > split.1 {
-                deletion.insert(*pp);
-                let diff = pp.y - split.1;
-                let new_y = split.1 - diff;
-                addition.insert(Point::new(pp.x, new_y));
+        out += "\n";
+    }
+    out
+}
+
+fn fold_point(point: &Point, folds: &[Fold]) -> Point {
+    let mut folded_point = *point;
+
+    for fold in folds.iter() {
+        match fold {
+            (FoldAxis::X, amount) => {
+                if folded_point.x > *amount {
+                    folded_point = Point::new(amount - (folded_point.x - amount), folded_point.y);
+                }
+            }
+            (FoldAxis::Y, amount) => {
+                if folded_point.y > *amount {
+                    folded_point = Point::new(folded_point.x, amount - (folded_point.y - amount));
+                }
             }
         }
     }
 
-    points
-        .union(&addition)
-        .cloned()
-        .collect::<HashSet<Point>>()
-        .difference(&deletion)
-        .cloned()
-        .collect()
+    folded_point
 }
 
-type Split = (bool, i32);
+enum FoldAxis {
+    X,
+    Y,
+}
 
-fn parse(input: &str) -> (Vec<Point>, Vec<Split>) {
+type Fold = (FoldAxis, i32);
+
+fn parse(input: &str) -> (Vec<Point>, Vec<Fold>) {
     let (points, splits) = input.split_once("\n\n").unwrap();
-    (parse_points(points), parse_splits(splits))
+    (parse_points(points), parse_folds(splits))
 }
 
 fn parse_points(input: &str) -> Vec<Point> {
     input
-        .split('\n')
+        .lines()
         .filter(|row| !row.trim().is_empty())
         .map(|row| {
             let (x, y) = row.split_once(',').unwrap();
@@ -101,20 +80,20 @@ fn parse_points(input: &str) -> Vec<Point> {
         .collect::<Vec<Point>>()
 }
 
-fn parse_splits(input: &str) -> Vec<Split> {
+fn parse_folds(input: &str) -> Vec<Fold> {
     input
-        .split('\n')
+        .lines()
         .filter(|row| !row.trim().is_empty())
         .map(|row| {
             if row.contains("x=") {
                 let (_, x) = row.split_once("x=").unwrap();
-                (true, x.parse::<i32>().unwrap())
+                (FoldAxis::X, x.parse::<i32>().unwrap())
             } else {
                 let (_, y) = row.split_once("y=").unwrap();
-                (false, y.parse::<i32>().unwrap())
+                (FoldAxis::Y, y.parse::<i32>().unwrap())
             }
         })
-        .collect::<Vec<Split>>()
+        .collect::<Vec<Fold>>()
 }
 
 mod tests_day_13 {
@@ -139,6 +118,9 @@ mod tests_day_13 {
 
     #[test]
     fn test_second_part() {
-        assert_eq!(second_part(include_str!("../inputs/13.in")), 102);
+        let out = second_part(include_str!("../inputs/13.in"));
+        println!("{}", out);
+
+        assert_eq!(out.lines().count(), 6);
     }
 }

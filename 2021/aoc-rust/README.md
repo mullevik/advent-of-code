@@ -1,12 +1,13 @@
 ```
 day       part 1    part 2    
 ------------------------------
-day 04    0.884 ms  4.856 ms  
-day 05    124.5 ms  127.3 ms  
-day 06    0.013 ms  0.044 ms  
-day 07    0.035 ms  0.038 ms  
-day 08    0.721 ms  1.426 ms  
-day 09    0.868 ms  2.533 ms  
+day 04    0.984 ms  5.306 ms  
+day 05    143.4 ms  147.9 ms  
+day 06    0.014 ms  0.049 ms  
+day 07    0.040 ms  0.043 ms  
+day 08    0.797 ms  1.515 ms  
+day 09    0.974 ms  2.813 ms  
+day 13    0.065 ms  0.138 ms  
 ```
 
 ## Daily notes
@@ -47,3 +48,7 @@ DFS with connected-components.
 
 Using custom grid implementation.
 
+
+### 13
+
+Very straight-forward imperative simulation.
