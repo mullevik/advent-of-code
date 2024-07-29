@@ -52,3 +52,8 @@ Using custom grid implementation.
 ### 13
 
 Very straight-forward imperative simulation.
+
+### 14
+
+Quite difficult task with recursion and memoization.
+
