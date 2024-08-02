@@ -10,6 +10,7 @@ mod day_14;
 mod utils;
 mod benchmark;
 mod grid;
+mod graph;
 
 use crate::benchmark::{benchmark_run, print_day, print_header};
 
