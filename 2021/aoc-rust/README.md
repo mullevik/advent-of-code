@@ -62,7 +62,14 @@ Custom Graph trait implementation.
 
 Very straight-forward imperative simulation.
 
+
 ### 14
 
 Quite difficult task with recursion and memoization.
+
+
+### 15
+
+Very straight-forward shortest path problem.
+
 

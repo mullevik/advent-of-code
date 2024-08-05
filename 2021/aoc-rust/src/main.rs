@@ -18,3 +18,4 @@ use crate::benchmark::{benchmark_run, print_day, print_header};
 fn main() {
     benchmark_all!(day_04, day_05, day_06, day_07, day_08, day_09, day_12, day_13, day_14, day_15)
 }
+
