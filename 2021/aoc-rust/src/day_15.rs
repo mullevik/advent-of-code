@@ -1,4 +1,8 @@
-use std::{collections::HashMap, usize};
+use std::{
+    cmp::Ordering,
+    collections::{BinaryHeap, HashMap},
+    usize,
+};
 
 use crate::grid::{Grid, Point};
 
@@ -6,10 +10,28 @@ pub fn first_part(input: &str) -> i32 {
     let g = parse(input);
     find_value_of_minimal_path(&g, g.width(), g.height())
 }
+
 pub fn second_part(input: &str) -> i32 {
     let g = parse(input);
 
     find_value_of_minimal_path(&g, 5 * g.width(), 5 * g.height())
+}
+#[derive(Eq, PartialEq)]
+struct State {
+    point: Point,
+    distance_from_start: i32,
+}
+
+impl Ord for State {
+    fn cmp(&self, other: &State) -> Ordering {
+        other.distance_from_start.cmp(&self.distance_from_start)  // reverse order (descending)
+    }
+}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(&other))
+    }
 }
 
 fn find_value_of_minimal_path(grid: &Grid<i32>, total_width: usize, total_height: usize) -> i32 {
@@ -17,26 +39,34 @@ fn find_value_of_minimal_path(grid: &Grid<i32>, total_width: usize, total_height
     let end = Point::new(total_width as i32 - 1, total_height as i32 - 1);
     let mut predecessors: HashMap<Point, Point> = HashMap::new();
 
-    let mut queue = vec![start];
+    let mut queue: BinaryHeap<State> = BinaryHeap::new();
 
     let mut distances_from_start: HashMap<Point, i32> = HashMap::new();
     distances_from_start.insert(start, 0);
+    //
+    queue.push(State {
+        point: start,
+        distance_from_start: 0,
+    });
 
     while !queue.is_empty() {
-        let current = extract_min(&mut queue, &distances_from_start);
+        let current = queue.pop().unwrap();
 
-        let dist_to_current = distances_from_start.get(&current).unwrap().to_owned();
 
-        for (adj_point, adj_val) in get_adjacents(current, &grid, total_width, total_height) {
+        for (adj_point, adj_val) in get_adjacents(current.point, &grid, total_width, total_height) {
             let dist_to_adjacent = distances_from_start
                 .get(&adj_point)
                 .unwrap_or(&i32::MAX)
                 .to_owned();
 
-            if dist_to_current + adj_val < dist_to_adjacent {
-                distances_from_start.insert(adj_point, dist_to_current + adj_val);
-                predecessors.insert(adj_point, current);
-                queue.push(adj_point);
+            if current.distance_from_start + adj_val < dist_to_adjacent {
+                let new_dist_to_adjacent = current.distance_from_start + adj_val;
+                distances_from_start.insert(adj_point, new_dist_to_adjacent);
+                predecessors.insert(adj_point, current.point);
+                queue.push(State {
+                    point: adj_point,
+                    distance_from_start: new_dist_to_adjacent,
+                });
             }
         }
     }
@@ -99,20 +129,6 @@ fn get_adjacents<'a>(
 }
 
 
-fn extract_min(queue: &mut Vec<Point>, distances_from_start: &HashMap<Point, i32>) -> Point {
-    let min = queue
-        .iter()
-        .map(|p| distances_from_start.get(p).unwrap_or(&i32::MAX))
-        .min()
-        .unwrap();
-    let pos = queue
-        .iter()
-        .position(|p| distances_from_start.get(p).unwrap_or(&i32::MAX) == min)
-        .unwrap();
-
-    queue.remove(pos)
-}
-
 fn parse(input: &str) -> Grid<i32> {
     input
         .lines()
@@ -128,7 +144,7 @@ fn parse(input: &str) -> Grid<i32> {
 #[cfg(test)]
 mod tests_day_15 {
     use crate::{
-        day_15::{first_part, second_part, get_value, parse},
+        day_15::{first_part, get_value, parse, second_part},
         grid::Point,
     };
 
