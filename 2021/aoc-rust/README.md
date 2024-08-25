@@ -1,15 +1,17 @@
 ```
 day       part 1    part 2    
 ------------------------------
-day 04    0.872 ms  4.939 ms  
-day 05    133.8 ms  136.6 ms  
-day 06    0.014 ms  0.046 ms  
-day 07    0.038 ms  0.040 ms  
-day 08    0.864 ms  1.679 ms  
-day 09    0.906 ms  2.911 ms  
-day 12    9.468 ms  241.4 ms  
-day 13    0.068 ms  0.129 ms  
-day 14    0.451 ms  2.624 ms  
+day 04    0.893 ms  4.974 ms  
+day 05    136.0 ms  139.6 ms  
+day 06    0.014 ms  0.047 ms  
+day 07    0.037 ms  0.040 ms  
+day 08    0.907 ms  1.747 ms  
+day 09    0.953 ms  3.166 ms  
+day 12    9.824 ms  249.7 ms  
+day 13    0.064 ms  0.133 ms  
+day 14    0.471 ms  2.732 ms  
+day 15    3.505 ms  120.1 ms  
+day 16    0.094 ms  0.100 ms  
 ```
 
 ## Daily notes
@@ -72,4 +74,7 @@ Quite difficult task with recursion and memoization.
 
 Very straight-forward shortest path problem.
 
+### 16
+
+Custom regular-language parser - tedious but simple.
 
