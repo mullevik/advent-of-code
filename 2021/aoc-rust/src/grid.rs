@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{cmp::max, ops::Deref, usize};
+use std::cmp::max;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GridError {
@@ -15,6 +15,22 @@ pub struct Point {
 impl Point {
     pub fn new(x: i32, y: i32) -> Self {
         Self { x, y }
+    }
+}
+
+
+impl std::ops::Add for Point {
+    type Output = Point;
+
+    fn add(self, other: Point) -> Point {
+        Point::new(self.x + other.x, self.y + other.y)
+    }
+}
+
+#[macro_export]
+macro_rules! p {
+    ($x:expr, $y:expr) => {
+        Point::new($x, $y)
     }
 }
 
