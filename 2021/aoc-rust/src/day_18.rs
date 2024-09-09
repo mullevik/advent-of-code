@@ -20,7 +20,47 @@ enum SnailFishNode {
     Nested(SnailFishNumber),
 }
 
-fn parse_snailfish_numbfer(input: &str) -> SnailFishNumber {
+fn explode(
+    n: SnailFishNode,
+    parent: Option<SnailFishNode>,
+    should_explode: bool,
+) -> (SnailFishNode, bool) {
+    todo!()
+}
+
+
+fn split(n: SnailFishNode, n_splits: i32) -> (SnailFishNode, i32) {
+    match n {
+        SnailFishNode::Literal(literal) => {
+            if literal >= 10 && n_splits == 0 {
+                let lhs = literal / 2;
+                let rhs = if literal % 2 == 0 { lhs } else { lhs + 1 };
+                (
+                    SnailFishNode::Nested(SnailFishNumber {
+                        lhs: Box::new(SnailFishNode::Literal(lhs)),
+                        rhs: Box::new(SnailFishNode::Literal(rhs)),
+                    }),
+                    1,
+                )
+            } else {
+                (n, n_splits)
+            }
+        }
+        SnailFishNode::Nested(nested) => {
+            let (lhs, n_lhs) = split(*nested.lhs, n_splits);
+            let (rhs, n_both) = split(*nested.rhs, n_lhs);
+            (
+                SnailFishNode::Nested(SnailFishNumber {
+                    lhs: Box::new(lhs),
+                    rhs: Box::new(rhs),
+                }),
+                n_both,
+            )
+        }
+    }
+}
+
+fn parse_snailfish_numbfer(input: &str) -> SnailFishNode {
     let mut stack: Vec<SnailFishNode> = vec![];
 
     let mut input_iter = input.chars().peekable();
@@ -42,11 +82,7 @@ fn parse_snailfish_numbfer(input: &str) -> SnailFishNumber {
         }
     }
 
-    if let Some(SnailFishNode::Nested(x)) = stack.pop() {
-        x
-    } else {
-        panic!("invalid stack");
-    }
+    stack.pop().expect("invalid stack at EOF")
 }
 
 fn parse_i32(input: &mut Peekable<impl Iterator<Item = char>>) -> i32 {
@@ -99,21 +135,40 @@ mod tests_day_18 {
     fn test_parse_sf() {
         assert_eq!(
             parse_snailfish_numbfer("[1, 2]"),
-            SnailFishNumber {
+            SnailFishNode::Nested(SnailFishNumber {
                 lhs: Box::new(SnailFishNode::Literal(1)),
                 rhs: Box::new(SnailFishNode::Literal(2))
-            }
+            })
         );
         assert_eq!(
             parse_snailfish_numbfer("[9,[8,7]]"),
-            SnailFishNumber {
+            SnailFishNode::Nested(SnailFishNumber {
                 lhs: Box::new(SnailFishNode::Literal(9)),
                 rhs: Box::new(SnailFishNode::Nested(SnailFishNumber {
                     lhs: Box::new(SnailFishNode::Literal(8)),
                     rhs: Box::new(SnailFishNode::Literal(7)),
                 })),
-            }
+            })
         );
     }
 
+    #[test]
+    fn test_split() {
+        assert_eq!(
+            split(parse_snailfish_numbfer("[11,[18,7]]"), 0),
+            (
+                SnailFishNode::Nested(SnailFishNumber {
+                    lhs: Box::new(SnailFishNode::Nested(SnailFishNumber {
+                        lhs: Box::new(SnailFishNode::Literal(5)),
+                        rhs: Box::new(SnailFishNode::Literal(6)),
+                    })),
+                    rhs: Box::new(SnailFishNode::Nested(SnailFishNumber {
+                        lhs: Box::new(SnailFishNode::Literal(18)),
+                        rhs: Box::new(SnailFishNode::Literal(7)),
+                    })),
+                }),
+                1
+            )
+        );
+    }
 }
