@@ -1,0 +1,126 @@
+use std::ops::{Mul, Add};
+
+#[derive(PartialEq, Eq, Debug, Copy, Clone)]
+pub struct Vec3 {
+    x: i32,
+    y: i32,
+    z: i32,
+}
+
+impl From<Vec<i32>> for Vec3 {
+    fn from(vec: Vec<i32>) -> Self {
+        if vec.len() != 3 {
+            panic!()
+        }
+
+        Vec3 {
+            x: vec[0],
+            y: vec[1],
+            z: vec[2],
+        }
+    }
+}
+
+impl Add for Vec3 {
+    type Output = Vec3;
+    
+    fn add(self, rhs: Self) -> Vec3 {
+        
+        Vec3 { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
+    }
+}
+
+pub struct Mat3 {
+    data: Vec<i32>,
+}
+
+impl Mat3 {
+    pub fn rotation_x(theta: i32) -> Mat3 {
+        let theta: f32 = theta as f32;
+        vec![
+            vec![1, 0, 0],
+            vec![0, theta.cos().round() as i32, -theta.sin().round() as i32],
+            vec![0, theta.sin().round() as i32, theta.cos().round() as i32],
+        ]
+        .into()
+    }
+
+    pub fn rotation_y(theta: i32) -> Mat3 {
+        let theta: f32 = theta as f32;
+        vec![
+            vec![theta.cos().round() as i32, 0, theta.sin().round() as i32],
+            vec![0, 1, 0],
+            vec![-theta.sin().round() as i32, 0, theta.cos().round() as i32],
+        ]
+        .into()
+    }
+
+    pub fn rotation_z(theta: i32) -> Mat3 {
+        let theta: f32 = theta as f32;
+        vec![
+            vec![theta.cos().round() as i32, -theta.sin().round() as i32, 0],
+            vec![theta.sin().round() as i32, theta.cos().round() as i32, 0],
+            vec![0, 0, 1],
+        ]
+        .into()
+
+    }
+
+}
+
+impl From<Vec<Vec<i32>>> for Mat3 {
+    fn from(vec: Vec<Vec<i32>>) -> Self {
+        if vec.len() != 3 && vec.iter().any(|v| v.len() != 3) {
+            panic!()
+        }
+
+        Mat3 {
+            data: vec.iter().flatten().cloned().collect(),
+        }
+    }
+}
+
+impl Mul<Vec3> for Mat3 {
+    type Output = Vec3;
+
+    fn mul(self, other: Vec3) -> Vec3 {
+        Vec3 {
+            x: other.x * self.data[0] + other.y * self.data[1] + other.z * self.data[2],
+            y: other.x * self.data[3] + other.y * self.data[4] + other.z * self.data[5],
+            z: other.x * self.data[6] + other.y * self.data[7] + other.z * self.data[8],
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests_space {
+    use super::*;
+
+    #[test]
+    fn test_vec3() {
+        let a: Vec3 = vec![1, 2, 3].into();
+        let b: Vec3 = vec![4, 5, 6].into();
+        assert_eq!(a + b, vec![5, 7, 9].into());
+    }
+
+    #[test]
+    fn test_mat3() {
+        let a: Mat3 = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]].into();
+
+        assert_eq!(a.data[4], 5);
+    }
+
+    #[test]
+    fn mat_mul() {
+        let identity: Mat3 = vec![vec![1, 0, 0], vec![0, 1, 0], vec![0, 0, 1]].into();
+        let a: Vec3 = vec![1, 1, 1].into();
+
+        assert_eq!(identity * a, a);
+        assert_eq!(Mat3::rotation_x(90) * a, vec![1, -1, 1].into());
+        assert_eq!(Mat3::rotation_x(-90) * a, vec![1, 1, -1].into());
+        assert_eq!(Mat3::rotation_y(90) * a, vec![1, 1, -1].into());
+        assert_eq!(Mat3::rotation_y(-90) * a, vec![-1, 1, 1].into());
+        assert_eq!(Mat3::rotation_z(90) * a, vec![-1, 1, 1].into());
+        assert_eq!(Mat3::rotation_z(-90) * a, vec![1, -1, 1].into());
+    }
+}
