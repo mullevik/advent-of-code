@@ -1,4 +1,3 @@
-use core::panic;
 use std::{char, iter::Peekable};
 
 pub fn first_part(input: &str) -> i32 {
@@ -9,25 +8,77 @@ pub fn second_part(input: &str) -> i32 {
     todo!()
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 struct SnailFishNumber {
     lhs: Box<SnailFishNode>,
     rhs: Box<SnailFishNode>,
 }
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 enum SnailFishNode {
     Literal(i32),
     Nested(SnailFishNumber),
 }
 
-fn explode(
-    n: SnailFishNode,
-    parent: Option<SnailFishNode>,
-    should_explode: bool,
-) -> (SnailFishNode, bool) {
-    todo!()
+fn find_first_explode_node(n: SnailFishNode, nesting_level: i32) -> Option<Box<SnailFishNode>> {
+    match n {
+        SnailFishNode::Literal(_) => None,
+        SnailFishNode::Nested(nested) => {
+            if nesting_level >= 3 && matches!(*nested.lhs, SnailFishNode::Nested(_)) {
+                return Some(nested.lhs);
+            }
+            if nesting_level >= 3 && matches!(*nested.rhs, SnailFishNode::Nested(_)) {
+                return Some(nested.rhs);
+            }
+            if let Some(lhs) = find_first_explode_node(*nested.lhs, nesting_level + 1) {
+                return Some(lhs);
+            } else {
+            }
+            if let Some(rhs) = find_first_explode_node(*nested.rhs, nesting_level + 1) {
+                return Some(rhs);
+            } else {
+            }
+            None
+        }
+    }
 }
 
+fn modify(
+    n: SnailFishNode,
+    to_replace: &Box<SnailFishNode>,
+    replace_with: &Box<SnailFishNode>,
+) -> SnailFishNode {
+    match n {
+        SnailFishNode::Literal(_) => n,
+        SnailFishNode::Nested(nested) => {
+            if nested.lhs == *to_replace {
+                SnailFishNode::Nested(SnailFishNumber {
+                    lhs: (*replace_with).clone(),
+                    rhs: nested.rhs,
+                })
+            } else if nested.rhs == *to_replace {
+                SnailFishNode::Nested(SnailFishNumber {
+                    lhs: nested.lhs,
+                    rhs: (*replace_with).clone(),
+                })
+            } else {
+                SnailFishNode::Nested(SnailFishNumber {
+                    lhs: Box::new(modify(*nested.lhs, to_replace, replace_with)),
+                    rhs: Box::new(modify(*nested.rhs, to_replace, replace_with)),
+                })
+            }
+        }
+    }
+}
+
+// fn explode(
+//     n: SnailFishNode,
+//     to_explode: SnailFishNumber,
+//     previous: Option<SnailFishNumber>
+//     previous_target_lhs: bool,
+//     next: Option<i32>,
+// ) -> (SnailFishNode, i32) {
+//     todo!()
+// }
 
 fn split(n: SnailFishNode, n_splits: i32) -> (SnailFishNode, i32) {
     match n {
@@ -96,6 +147,7 @@ fn parse_i32(input: &mut Peekable<impl Iterator<Item = char>>) -> i32 {
 
 #[cfg(test)]
 mod tests_day_18 {
+
     use super::*;
 
     #[test]
@@ -170,5 +222,38 @@ mod tests_day_18 {
                 1
             )
         );
+    }
+
+    #[test]
+    fn test_find_first_explode() {
+        assert_eq!(
+            *find_first_explode_node(parse_snailfish_numbfer("[[[[[9,8],1],2],3],4]"), 0).unwrap(),
+            SnailFishNode::Nested(SnailFishNumber {
+                lhs: Box::new(SnailFishNode::Literal(9)),
+                rhs: Box::new(SnailFishNode::Literal(8))
+            })
+        );
+        assert_eq!(
+            find_first_explode_node(parse_snailfish_numbfer("[[[[3,1],2],3],4]"), 0),
+            None
+        )
+    }
+    #[test]
+    fn test_modify() {
+        let a = parse_snailfish_numbfer("[1, [2, 3]]");
+        let b = parse_snailfish_numbfer("[[4, 5], 6]");
+
+
+
+        if let (SnailFishNode::Nested(nested_a), SnailFishNode::Nested(nested_b)) = (a.clone(), b) {
+            let to_replace = nested_a.rhs;
+            let replace_with = nested_b.lhs;
+            assert_eq!(
+                modify(a, &to_replace, &replace_with),
+                parse_snailfish_numbfer("[1,[4,5]]")
+            )
+        } else {
+            assert!(false);
+        }
     }
 }
