@@ -1,18 +1,19 @@
 ```
 day       part 1    part 2    
 ------------------------------
-day 04    0.910 ms  5.182 ms  
-day 05    140.5 ms  141.0 ms  
-day 06    0.015 ms  0.048 ms  
-day 07    0.039 ms  0.042 ms  
-day 08    0.890 ms  1.846 ms  
-day 09    0.953 ms  3.127 ms  
-day 12    10.28 ms  268.7 ms  
-day 13    0.067 ms  0.133 ms  
-day 14    0.475 ms  2.731 ms  
-day 15    3.135 ms  106.6 ms  
-day 16    0.096 ms  0.098 ms  
-day 17    11.95 ms  11.67 ms  
+day 04    0.922 ms  5.079 ms  
+day 05    139.7 ms  140.7 ms  
+day 06    0.014 ms  0.048 ms  
+day 07    0.038 ms  0.041 ms  
+day 08    0.882 ms  1.673 ms  
+day 09    0.864 ms  2.925 ms  
+day 12    9.309 ms  239.6 ms  
+day 13    0.063 ms  0.125 ms  
+day 14    0.441 ms  2.567 ms  
+day 15    3.316 ms  109.8 ms  
+day 16    0.087 ms  0.089 ms  
+day 17    11.23 ms  11.06 ms  
+day 19    4673. ms  5253. ms  
 ```
 
 ## Daily notes
@@ -83,3 +84,8 @@ Custom regular-language parser - tedious but simple.
 
 Shooting probe at target. There probably exists an analytical solution... 
 oh well, I solved it iteratively and with a baked-in constant. Shame on me.
+
+### 19
+
+3D space rotations. Custom Vec3 and Mat3 implementations. 
+Not my proudest solution: it is very naive and slow.
