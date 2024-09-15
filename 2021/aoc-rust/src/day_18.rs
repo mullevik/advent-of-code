@@ -1,17 +1,29 @@
 use core::{fmt, panic};
-use std::{
-    char,
-    fmt::{Debug, Pointer},
-    iter::Peekable,
-    rc::Rc,
-};
+use std::{char, fmt::Debug, iter::Peekable, rc::Rc};
 
-pub fn first_part(input: &str) -> i32 {
-    todo!()
+use itertools::Itertools;
+
+pub fn first_part(input: &str) -> i64 {
+    let numbers = parse(input);
+
+    let result = numbers
+        .into_iter()
+        .reduce(|a, b| add(a.clone(), b.clone()))
+        .unwrap();
+
+    result.magnitude()
 }
 
-pub fn second_part(input: &str) -> i32 {
-    todo!()
+pub fn second_part(input: &str) -> i64 {
+    let numbers = parse(input);
+
+    numbers
+        .iter()
+        .cloned()
+        .cartesian_product(numbers.iter().cloned())
+        .filter(|(a, b)| a != b)
+        .map(|(a, b)| add(a, b).magnitude())
+        .max().unwrap()
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -23,6 +35,17 @@ struct SnailFishNumber {
 enum SnailFishNode {
     Literal(i32),
     Nested(SnailFishNumber),
+}
+
+impl SnailFishNode {
+    fn magnitude(&self) -> i64 {
+        match self {
+            SnailFishNode::Literal(lit) => *lit as i64,
+            SnailFishNode::Nested(nested) => {
+                3 * nested.lhs.magnitude() + 2 * nested.rhs.magnitude()
+            }
+        }
+    }
 }
 
 impl fmt::Debug for SnailFishNode {
@@ -40,6 +63,142 @@ impl fmt::Debug for SnailFishNode {
             }
         };
         Ok(())
+    }
+}
+
+fn add(a: Rc<SnailFishNode>, b: Rc<SnailFishNode>) -> Rc<SnailFishNode> {
+    reduce(Rc::new(SnailFishNode::Nested(SnailFishNumber {
+        lhs: a,
+        rhs: b,
+    })))
+}
+
+fn reduce(n: Rc<SnailFishNode>) -> Rc<SnailFishNode> {
+    let mut new_n = n.clone();
+    loop {
+        let (x, n_operations) = explode(new_n.clone());
+
+        if n_operations > 0 {
+            new_n = x.clone();
+            continue;
+        }
+
+        let (x, n_operations) = split(new_n.clone(), 0);
+
+        if n_operations > 0 {
+            new_n = x.clone();
+            continue;
+        }
+
+        break;
+    }
+
+    new_n
+}
+
+fn explode(n: Rc<SnailFishNode>) -> (Rc<SnailFishNode>, i32) {
+    let mut new_n = n.clone();
+
+    let mut to_explode = {
+        match find_first_explode_node(new_n.clone(), 0) {
+            Some(_n) => _n,
+            None => return (n, 0),
+        }
+    };
+
+    let lhs: i32 = {
+        match to_explode.as_ref() {
+            SnailFishNode::Literal(_) => panic!("Exploded node is not supposed to be literal"),
+            SnailFishNode::Nested(nested) => match nested.lhs.as_ref() {
+                SnailFishNode::Literal(lit) => *lit,
+                SnailFishNode::Nested(_) => {
+                    panic!("Lhs of exploded node is supposed to be literal.")
+                }
+            },
+        }
+    };
+    let rhs: i32 = {
+        match to_explode.as_ref() {
+            SnailFishNode::Literal(_) => panic!("Exploded node is not supposed to be literal"),
+            SnailFishNode::Nested(nested) => match nested.rhs.as_ref() {
+                SnailFishNode::Literal(lit) => *lit,
+                SnailFishNode::Nested(_) => {
+                    panic!("Lhs of exploded node is supposed to be literal.")
+                }
+            },
+        }
+    };
+
+    let maybe_prev_lit =
+        find_prev_literal_before_target(new_n.clone(), to_explode.clone(), false).0;
+
+    if let Some(prev_lit) = maybe_prev_lit {
+        let new_prev = {
+            match prev_lit.as_ref() {
+                SnailFishNode::Literal(lit) => lit,
+                SnailFishNode::Nested(_) => panic!("Found prev should be a lit"),
+            }
+        };
+        new_n = modify(
+            new_n.clone(),
+            prev_lit.clone(),
+            Rc::new(SnailFishNode::Literal(new_prev + lhs)),
+        );
+    }
+
+    to_explode = find_first_explode_node(new_n.clone(), 0).unwrap();
+
+    let maybe_next_lit = find_next_literal_after_target(new_n.clone(), to_explode.clone(), false).0;
+    if let Some(next_lit) = maybe_next_lit {
+        let new_next = {
+            match next_lit.as_ref() {
+                SnailFishNode::Literal(lit) => lit,
+                SnailFishNode::Nested(_) => panic!("Found next should be a lit"),
+            }
+        };
+        new_n = modify(
+            new_n.clone(),
+            next_lit.clone(),
+            Rc::new(SnailFishNode::Literal(new_next + rhs)),
+        );
+    }
+
+    to_explode = find_first_explode_node(new_n.clone(), 0).unwrap();
+
+    new_n = modify(
+        new_n.clone(),
+        to_explode.clone(),
+        Rc::new(SnailFishNode::Literal(0)),
+    );
+
+    (new_n, 1)
+}
+
+fn split(n: Rc<SnailFishNode>, n_splits: i32) -> (Rc<SnailFishNode>, i32) {
+    match n.as_ref() {
+        SnailFishNode::Literal(literal) => {
+            if literal >= &10 && n_splits == 0 {
+                let lhs = literal / 2;
+                let rhs = if literal % 2 == 0 { lhs } else { lhs + 1 };
+                (
+                    Rc::new(SnailFishNode::Nested(SnailFishNumber {
+                        lhs: Rc::new(SnailFishNode::Literal(lhs)),
+                        rhs: Rc::new(SnailFishNode::Literal(rhs)),
+                    })),
+                    1,
+                )
+            } else {
+                (n, n_splits)
+            }
+        }
+        SnailFishNode::Nested(nested) => {
+            let (lhs, n_lhs) = split(nested.lhs.clone(), n_splits);
+            let (rhs, n_both) = split(nested.rhs.clone(), n_lhs);
+            (
+                Rc::new(SnailFishNode::Nested(SnailFishNumber { lhs, rhs })),
+                n_both,
+            )
+        }
     }
 }
 
@@ -168,109 +327,6 @@ fn find_prev_literal_before_target(
         }
     }
 }
-
-fn explode(n: Rc<SnailFishNode>) -> Rc<SnailFishNode> {
-    let mut new_n = n.clone();
-
-    let mut to_explode = find_first_explode_node(n, 0).unwrap();
-
-
-    let lhs: i32 = {
-        match to_explode.as_ref() {
-            SnailFishNode::Literal(_) => panic!("Exploded node is not supposed to be literal"),
-            SnailFishNode::Nested(nested) => match nested.lhs.as_ref() {
-                SnailFishNode::Literal(lit) => *lit,
-                SnailFishNode::Nested(_) => {
-                    panic!("Lhs of exploded node is supposed to be literal.")
-                }
-            },
-        }
-    };
-    let rhs: i32 = {
-        match to_explode.as_ref() {
-            SnailFishNode::Literal(_) => panic!("Exploded node is not supposed to be literal"),
-            SnailFishNode::Nested(nested) => match nested.rhs.as_ref() {
-                SnailFishNode::Literal(lit) => *lit,
-                SnailFishNode::Nested(_) => {
-                    panic!("Lhs of exploded node is supposed to be literal.")
-                }
-            },
-        }
-    };
-
-    let maybe_prev_lit =
-        find_prev_literal_before_target(new_n.clone(), to_explode.clone(), false).0;
-
-    if let Some(prev_lit) = maybe_prev_lit {
-        let new_prev = {
-            match prev_lit.as_ref() {
-                SnailFishNode::Literal(lit) => lit,
-                SnailFishNode::Nested(_) => panic!("Found prev should be a lit"),
-            }
-        };
-        new_n = modify(
-            new_n.clone(),
-            prev_lit.clone(),
-            Rc::new(SnailFishNode::Literal(new_prev + lhs)),
-        );
-    }
-
-    to_explode = find_first_explode_node(new_n.clone(), 0).unwrap();
-
-    let maybe_next_lit = find_next_literal_after_target(new_n.clone(), to_explode.clone(), false).0;
-    if let Some(next_lit) = maybe_next_lit {
-        let new_next = {
-            match next_lit.as_ref() {
-                SnailFishNode::Literal(lit) => lit,
-                SnailFishNode::Nested(_) => panic!("Found next should be a lit"),
-            }
-        };
-        new_n = modify(
-            new_n.clone(),
-            next_lit.clone(),
-            Rc::new(SnailFishNode::Literal(new_next + rhs)),
-        );
-    }
-
-    to_explode = find_first_explode_node(new_n.clone(), 0).unwrap();
-
-    new_n = modify(
-        new_n.clone(),
-        to_explode.clone(),
-        Rc::new(SnailFishNode::Literal(0)),
-    );
-
-    new_n
-}
-
-fn split(n: Rc<SnailFishNode>, n_splits: i32) -> (Rc<SnailFishNode>, i32) {
-    match n.as_ref() {
-        SnailFishNode::Literal(literal) => {
-            if literal >= &10 && n_splits == 0 {
-                let lhs = literal / 2;
-                let rhs = if literal % 2 == 0 { lhs } else { lhs + 1 };
-                (
-                    Rc::new(SnailFishNode::Nested(SnailFishNumber {
-                        lhs: Rc::new(SnailFishNode::Literal(lhs)),
-                        rhs: Rc::new(SnailFishNode::Literal(rhs)),
-                    })),
-                    1,
-                )
-            } else {
-                (n, n_splits)
-            }
-        }
-        SnailFishNode::Nested(nested) => {
-            let (lhs, n_lhs) = split(nested.lhs.clone(), n_splits);
-            let (rhs, n_both) = split(nested.rhs.clone(), n_lhs);
-            (
-                Rc::new(SnailFishNode::Nested(SnailFishNumber { lhs, rhs })),
-                n_both,
-            )
-        }
-    }
-}
-
 fn parse_snailfish_numbfer(input: &str) -> Rc<SnailFishNode> {
     let mut stack: Vec<SnailFishNode> = vec![];
 
@@ -305,14 +361,16 @@ fn parse_i32(input: &mut Peekable<impl Iterator<Item = char>>) -> i32 {
     stack.parse::<i32>().unwrap()
 }
 
+fn parse(input: &str) -> Vec<Rc<SnailFishNode>> {
+    input
+        .lines()
+        .filter(|line| line.contains("["))
+        .map(|line| parse_snailfish_numbfer(line))
+        .collect()
+}
+
 #[cfg(test)]
 mod tests_day_18 {
-
-    use std::{
-        borrow::{Borrow, BorrowMut},
-        ops::Deref,
-        rc::Rc,
-    };
 
     use super::*;
 
@@ -442,16 +500,46 @@ mod tests_day_18 {
     #[test]
     fn test_explode() {
         assert_eq!(
-            explode(parse_snailfish_numbfer("[[[[[9,8],1],2],3],4]")),
+            explode(parse_snailfish_numbfer("[[[[[9,8],1],2],3],4]")).0,
             parse_snailfish_numbfer("[[[[0,9],2],3],4]")
         );
         assert_eq!(
-            explode(parse_snailfish_numbfer("[7,[6,[5,[4,[3,2]]]]]")),
+            explode(parse_snailfish_numbfer("[7,[6,[5,[4,[3,2]]]]]")).0,
             parse_snailfish_numbfer("[7,[6,[5,[7,0]]]]")
         );
         assert_eq!(
-            explode(parse_snailfish_numbfer("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]")),
+            explode(parse_snailfish_numbfer(
+                "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]"
+            ))
+            .0,
             parse_snailfish_numbfer("[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]")
         );
     }
+
+    #[test]
+    fn test_addition() {
+        let a = parse_snailfish_numbfer("[[[[4,3],4],4],[7,[[8,4],9]]]");
+        let b = parse_snailfish_numbfer("[1,1]");
+
+        assert_eq!(
+            add(a, b),
+            parse_snailfish_numbfer("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]")
+        );
+    }
+
+    #[test]
+    fn test_example_first_part() {
+        assert_eq!(first_part(include_str!("../inputs/18_example")), 4140);
+    }
+
+    #[test]
+    fn test_first_part() {
+        assert_eq!(first_part(include_str!("../inputs/18.in")), 3051);
+    }
+
+    #[test]
+    fn test_second_part() {
+        assert_eq!(second_part(include_str!("../inputs/18.in")), 4812);
+    }
+
 }
