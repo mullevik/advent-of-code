@@ -1,9 +1,11 @@
 use itertools::Itertools;
-use std::collections::{HashSet, VecDeque};
+use rayon::prelude::*;
+use std::collections::VecDeque;
+use rustc_hash::FxHashSet;
+
 
 use crate::space::{Mat3, Vec3};
 
-const MATCHED_BEACONS: usize = 12;
 
 pub fn first_part(input: &str) -> i32 {
     let scanners = parse(input);
@@ -25,8 +27,8 @@ pub fn second_part(input: &str) -> i32 {
         .unwrap()
 }
 
-fn build_ocean(scanners: &Vec<Vec<Vec3>>) -> (HashSet<Vec3>, Vec<Vec3>) {
-    let mut base: HashSet<Vec3> = scanners[0].iter().cloned().collect();
+fn build_ocean(scanners: &Vec<Vec<Vec3>>) -> (FxHashSet<Vec3>, Vec<Vec3>) {
+    let mut base: FxHashSet<Vec3> = scanners[0].iter().cloned().collect();
 
     let mut remaining_scanners: VecDeque<(usize, Vec<Vec3>)> = VecDeque::new();
     for i in 1..scanners.len() {
@@ -39,7 +41,7 @@ fn build_ocean(scanners: &Vec<Vec<Vec3>>) -> (HashSet<Vec3>, Vec<Vec3>) {
 
     while let Some((scanner_id, scanner_data)) = remaining_scanners.pop_front() {
         let (n, rotation, offset) =
-            find_best_rotation_and_offset(&scanner_data, &base, &all_rotations, MATCHED_BEACONS);
+            find_best_rotation_and_offset(&scanner_data, &base, &all_rotations);
 
         if n < 12 {
             remaining_scanners.push_back((scanner_id, scanner_data));
@@ -61,82 +63,52 @@ fn manhattan_distance(a: Vec3, b: Vec3) -> i32 {
 
 fn find_best_rotation_and_offset<'a>(
     beacons: &[Vec3],
-    base: &HashSet<Vec3>,
+    base: &FxHashSet<Vec3>,
     possible_rotations: &'a [Mat3],
-    stop_at: usize,
 ) -> (usize, &'a Mat3, Vec3) {
-    // possible_rotations
-    //     .iter()
-    //     .map(|rot| {
-    //         let rotated_beacons = beacons
-    //             .iter()
-    //             .map(
-    //                 |&b| rot * b,
-    //             )
-    //             .collect::<Vec<_>>();
+    possible_rotations
+        .par_iter()
+        .map(|rot| {
+            let rotated_beacons = beacons
+                .iter()
+                .map(
+                    |&b| rot * b,
+                )
+                .collect::<Vec<_>>();
 
-    //         let (n, offset) = find_best_offset(&rotated_beacons, base);
+            let (n, offset) = find_best_offset(&rotated_beacons, base);
 
-    //         (n, rot, offset)
-    //     })
-    //     .max_by_key(|x| x.0)
-    //     .unwrap()
+            (n, rot, offset)
+        })
+        .max_by_key(|x| x.0)
+        .unwrap()
 
-    // For loop with early stopping is much faster:
-    for rot in possible_rotations {
-        let rotated_beacons = beacons.iter().map(|&b| rot * b).collect::<Vec<_>>();
-        let (n, offset) = find_best_offset(&rotated_beacons, base, stop_at);
-
-        if n >= stop_at {
-            return (n, rot, offset);
-        }
-    }
-
-    return (0, &possible_rotations[0], Vec3 { x: 0, y: 0, z: 0 }); // dummy unmatched return
 }
 
-fn find_best_offset(beacons: &[Vec3], base: &HashSet<Vec3>, stop_at: usize) -> (usize, Vec3) {
-    // beacons
-    //     .iter()
-    //     .cartesian_product(base.iter())
-    //     .map(|(&b, &base_b)| {
-    //         let offset = base_b - b;
-
-    //         let n_matches = match_beacons(
-    //             &beacons.iter().map(|&_b| _b + offset).collect::<Vec<_>>(),
-    //             base,
-    //         );
-
-    //         (n_matches, offset)
-    //     })
-    //     .max_by_key(|x| x.0)
-    //     .unwrap()
-
-
-    // For loop with early stopping is much faster:
-    for b in beacons.iter() {
-        for base_b in base.iter() {
-            let offset = *base_b - *b;
+fn find_best_offset(beacons: &[Vec3], base: &FxHashSet<Vec3>) -> (usize, Vec3) {
+    beacons
+        .iter()
+        .cartesian_product(base.iter())
+        .map(|(&b, &base_b)| {
+            let offset = base_b - b;
 
             let n_matches = match_beacons(
                 &beacons.iter().map(|&_b| _b + offset).collect::<Vec<_>>(),
                 base,
             );
 
-            if n_matches >= stop_at {
-                return (n_matches, offset);
-            }
-        }
-    }
+            (n_matches, offset)
+        })
+        .max_by_key(|x| x.0)
+        .unwrap()
 
-    (0, Vec3 { x: 0, y: 0, z: 0 })
 }
 
-fn match_beacons(beacons: &[Vec3], base: &HashSet<Vec3>) -> usize {
+fn match_beacons(beacons: &[Vec3], base: &FxHashSet<Vec3>) -> usize {
     beacons.iter().filter(|b| base.contains(b)).count()
 }
 
-fn generate_rotation_matrices() -> HashSet<Mat3> {
+fn generate_rotation_matrices() -> FxHashSet<Mat3> {
     /*
      * There is likely a consistent way to generate all possible rotation matrices ... this works
      * though ....
@@ -158,7 +130,7 @@ fn generate_rotation_matrices() -> HashSet<Mat3> {
             .into_iter()
         })
         .flatten()
-        .collect::<HashSet<Mat3>>()
+        .collect::<FxHashSet<Mat3>>()
 }
 
 fn parse(input: &str) -> Vec<Vec<Vec3>> {
@@ -198,7 +170,7 @@ mod tests_day_19 {
 
     #[test]
     fn test_match_beacons() {
-        let base: HashSet<Vec3> = vec![
+        let base: FxHashSet<Vec3> = vec![
             vec![1, 0, 0].into(),
             vec![3, 0, 0].into(),
             vec![10, 0, 10].into(),
@@ -216,7 +188,7 @@ mod tests_day_19 {
         let rots: Vec<Mat3> = generate_rotation_matrices().iter().cloned().collect();
 
         assert_eq!(
-            find_best_rotation_and_offset(&beacons, &base, &rots, 3),
+            find_best_rotation_and_offset(&beacons, &base, &rots),
             (3, &Mat3::rotation_z(90), vec![1, 0, 0].into())
         );
     }

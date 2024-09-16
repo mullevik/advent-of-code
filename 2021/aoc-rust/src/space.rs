@@ -47,7 +47,7 @@ impl Sub for Vec3 {
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Mat3 {
-    data: Vec<i32>,
+    data: [i32; 9],
 }
 
 impl Mat3 {
@@ -88,9 +88,13 @@ impl From<Vec<Vec<i32>>> for Mat3 {
             panic!()
         }
 
-        Mat3 {
-            data: vec.iter().flatten().cloned().collect(),
+        let mut data = [0; 9];
+
+        for (i, x) in vec.iter().flatten().enumerate() {
+            data[i] = *x;
         }
+
+        Mat3 { data }
     }
 }
 
@@ -110,15 +114,13 @@ impl Mul<&Mat3> for &Mat3 {
     type Output = Mat3;
 
     fn mul(self, rhs: &Mat3) -> Self::Output {
-        let mut data = Vec::with_capacity(9);
+        let mut data = [0; 9];
 
         for row in 0..3 {
             for col in 0..3 {
-                data.push(
-                    self.data[(row * 3) + 0] * rhs.data[col]
-                        + self.data[(row * 3) + 1] * rhs.data[col + 3]
-                        + self.data[(row * 3) + 2] * rhs.data[col + 6],
-                );
+                data[row * 3 + col] = self.data[(row * 3) + 0] * rhs.data[col]
+                    + self.data[(row * 3) + 1] * rhs.data[col + 3]
+                    + self.data[(row * 3) + 2] * rhs.data[col + 6];
             }
         }
 
