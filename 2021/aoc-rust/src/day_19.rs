@@ -1,11 +1,9 @@
 use itertools::Itertools;
 use rayon::prelude::*;
-use std::collections::VecDeque;
 use rustc_hash::FxHashSet;
-
+use std::collections::VecDeque;
 
 use crate::space::{Mat3, Vec3};
-
 
 pub fn first_part(input: &str) -> i32 {
     let scanners = parse(input);
@@ -35,7 +33,7 @@ fn build_ocean(scanners: &Vec<Vec<Vec3>>) -> (FxHashSet<Vec3>, Vec<Vec3>) {
         remaining_scanners.push_back((i, scanners[i].clone()));
     }
 
-    let all_rotations: Vec<Mat3> = generate_rotation_matrices().iter().cloned().collect();
+    let all_rotations: Vec<Mat3> = generate_rotation_matrices().collect();
 
     let mut found_scanners = vec![];
 
@@ -69,12 +67,7 @@ fn find_best_rotation_and_offset<'a>(
     possible_rotations
         .par_iter()
         .map(|rot| {
-            let rotated_beacons = beacons
-                .iter()
-                .map(
-                    |&b| rot * b,
-                )
-                .collect::<Vec<_>>();
+            let rotated_beacons = beacons.iter().map(|&b| rot * b).collect::<Vec<_>>();
 
             let (n, offset) = find_best_offset(&rotated_beacons, base);
 
@@ -82,7 +75,6 @@ fn find_best_rotation_and_offset<'a>(
         })
         .max_by_key(|x| x.0)
         .unwrap()
-
 }
 
 fn find_best_offset(beacons: &[Vec3], base: &FxHashSet<Vec3>) -> (usize, Vec3) {
@@ -101,36 +93,29 @@ fn find_best_offset(beacons: &[Vec3], base: &FxHashSet<Vec3>) -> (usize, Vec3) {
         })
         .max_by_key(|x| x.0)
         .unwrap()
-
 }
 
 fn match_beacons(beacons: &[Vec3], base: &FxHashSet<Vec3>) -> usize {
     beacons.iter().filter(|b| base.contains(b)).count()
 }
 
-fn generate_rotation_matrices() -> FxHashSet<Mat3> {
-    /*
-     * There is likely a consistent way to generate all possible rotation matrices ... this works
-     * though ....
-     */
+fn generate_rotation_matrices() -> impl Iterator<Item = Mat3> {
     [0, 90, 180, 270]
         .into_iter()
         .map(|rot| {
             [
                 Mat3::rotation_x(rot),
-                Mat3::rotation_y(rot),
-                Mat3::rotation_z(rot),
                 &Mat3::rotation_y(rot) * &Mat3::rotation_z(90),
-                &Mat3::rotation_y(rot) * &Mat3::rotation_z(180),
+                &Mat3::rotation_z(rot) * &Mat3::rotation_y(270),
+                
+                &Mat3::rotation_x(rot) * &Mat3::rotation_y(180),
                 &Mat3::rotation_y(rot) * &Mat3::rotation_z(270),
-                &Mat3::rotation_x(rot) * &Mat3::rotation_z(90),
-                &Mat3::rotation_x(rot) * &Mat3::rotation_z(180),
-                &Mat3::rotation_x(rot) * &Mat3::rotation_z(270),
+                &Mat3::rotation_z(rot) * &Mat3::rotation_y(90),
+
             ]
             .into_iter()
         })
         .flatten()
-        .collect::<FxHashSet<Mat3>>()
 }
 
 fn parse(input: &str) -> Vec<Vec<Vec3>> {
@@ -185,12 +170,20 @@ mod tests_day_19 {
             vec![0, -9, 10].into(),
         ];
 
-        let rots: Vec<Mat3> = generate_rotation_matrices().iter().cloned().collect();
+        let rots: Vec<Mat3> = generate_rotation_matrices().collect();
 
         assert_eq!(
             find_best_rotation_and_offset(&beacons, &base, &rots),
             (3, &Mat3::rotation_z(90), vec![1, 0, 0].into())
         );
+    }
+
+    #[test]
+    fn test_rotations() {
+        assert_eq!(
+            generate_rotation_matrices().collect::<FxHashSet<_>>().len(),
+            24
+        )
     }
 
     #[test]
