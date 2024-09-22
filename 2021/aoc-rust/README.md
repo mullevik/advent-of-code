@@ -1,20 +1,21 @@
 ```
 day       part 1    part 2    
 ------------------------------
-day 04    0.980 ms  5.227 ms  
-day 05    148.2 ms  147.7 ms  
-day 06    0.016 ms  0.052 ms  
-day 07    0.042 ms  0.046 ms  
-day 08    0.959 ms  1.792 ms  
-day 09    0.994 ms  3.267 ms  
-day 12    10.33 ms  267.6 ms  
-day 13    0.073 ms  0.148 ms  
-day 14    0.510 ms  2.965 ms  
-day 15    3.781 ms  125.9 ms  
-day 16    0.103 ms  0.107 ms  
-day 17    16.11 ms  15.58 ms  
-day 18    40.15 ms  551.9 ms  
-day 19    558.3 ms  574.9 ms  
+day 04    1.158 ms  6.254 ms  
+day 05    152.9 ms  154.3 ms  
+day 06    0.016 ms  0.054 ms  
+day 07    0.043 ms  0.046 ms  
+day 08    0.990 ms  1.997 ms  
+day 09    1.000 ms  3.405 ms  
+day 12    11.04 ms  280.7 ms  
+day 13    0.073 ms  0.142 ms  
+day 14    0.507 ms  2.924 ms  
+day 15    3.772 ms  124.8 ms  
+day 16    0.100 ms  0.102 ms  
+day 17    12.60 ms  12.47 ms  
+day 18    39.08 ms  540.5 ms  
+day 19    565.6 ms  580.8 ms  
+day 20    0.513 ms  20.89 ms 
 ```
 
 ## Daily notes
@@ -98,3 +99,7 @@ It is likely very very overengineered.
 3D space rotations. Custom Vec3 and Mat3 implementations. 
 Not my proudest solution: it is very naive and very slow.
 Faster HashSet and parallelization made it quite fast though.
+
+### 20
+
+2D convolution with out-of-bounds value selection.
