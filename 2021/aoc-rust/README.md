@@ -1,21 +1,21 @@
 ```
 day       part 1    part 2    
 ------------------------------
-day 04    1.158 ms  6.254 ms  
-day 05    152.9 ms  154.3 ms  
-day 06    0.016 ms  0.054 ms  
-day 07    0.043 ms  0.046 ms  
-day 08    0.990 ms  1.997 ms  
-day 09    1.000 ms  3.405 ms  
-day 12    11.04 ms  280.7 ms  
-day 13    0.073 ms  0.142 ms  
-day 14    0.507 ms  2.924 ms  
-day 15    3.772 ms  124.8 ms  
-day 16    0.100 ms  0.102 ms  
-day 17    12.60 ms  12.47 ms  
-day 18    39.08 ms  540.5 ms  
-day 19    565.6 ms  580.8 ms  
-day 20    0.513 ms  20.89 ms 
+day 04    1.066 ms  5.677 ms  
+day 05    140.4 ms  140.0 ms  
+day 06    0.015 ms  0.050 ms  
+day 07    0.041 ms  0.043 ms  
+day 08    0.916 ms  1.838 ms  
+day 09    0.930 ms  3.137 ms  
+day 12    10.11 ms  257.9 ms  
+day 13    0.076 ms  0.140 ms  
+day 14    0.483 ms  2.807 ms  
+day 15    3.602 ms  117.9 ms  
+day 16    0.104 ms  0.107 ms  
+day 17    17.80 ms  15.00 ms  
+day 18    38.45 ms  536.5 ms  
+day 19    622.5 ms  657.0 ms  
+day 20    0.490 ms  13.01 ms  
 ```
 
 ## Daily notes

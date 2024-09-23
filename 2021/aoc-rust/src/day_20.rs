@@ -1,4 +1,6 @@
 use core::{fmt, panic};
+use rayon::prelude::*;
+use std::{thread, usize};
 
 pub fn first_part(input: &str) -> i64 {
     let (data, image) = parse(input);
@@ -18,7 +20,8 @@ fn enhance(image: Image, data: &[bool], n_times: i32) -> Image {
     let mut enhanced_image = image;
     for i in 0..n_times {
         let is_odd = i % 2 == 1;
-        enhanced_image = convolve(&enhanced_image, data, is_odd && *data.first().unwrap());
+        enhanced_image =
+            convolve_par_iter_mut(&enhanced_image, data, is_odd && *data.first().unwrap());
     }
     enhanced_image
 }
@@ -95,6 +98,46 @@ fn convolve(image: &Image, data: &[bool], out_of_bounds_value: bool) -> Image {
         }
     }
 
+    output_image
+}
+
+fn convolve_par_iter_mut(image: &Image, data: &[bool], out_of_bounds_value: bool) -> Image {
+    let mut output_image = Image::empty(image.width + 2, image.height + 2);
+
+    output_image
+        .data
+        .par_iter_mut()
+        .enumerate()
+        .for_each(|(i, output)| {
+            *output = data[window_value(
+                image,
+                (i % output_image.height) as i32 - 1,
+                (i / output_image.height) as i32 - 1,
+                out_of_bounds_value,
+            )];
+        });
+
+    output_image
+}
+
+fn convolve_par_chunks_mut(image: &Image, data: &[bool], out_of_bounds_value: bool) -> Image {
+    let mut output_image = Image::empty(image.width + 2, image.height + 2);
+    let num_cores = thread::available_parallelism().unwrap();
+    let chunk_size = output_image.data.len() / num_cores;
+    output_image
+        .data
+        .par_chunks_mut(chunk_size)
+        .enumerate()
+        .for_each(|(i, output)| {
+            output.iter_mut().enumerate().for_each(|(j, o)| {
+                *o = data[window_value(
+                    image,
+                    ((i * chunk_size + j) % output_image.height) as i32 - 1,
+                    ((i * chunk_size + j) / output_image.height) as i32 - 1,
+                    out_of_bounds_value,
+                )];
+            })
+        });
     output_image
 }
 
