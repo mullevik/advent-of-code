@@ -57,6 +57,10 @@ DFS with connected-components.
 
 Using custom grid implementation.
 
+### 10
+
+Stack based parsing of matching brackets.
+
 
 ### 12
 
