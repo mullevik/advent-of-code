@@ -1,21 +1,22 @@
 ```
 day       part 1    part 2    
 ------------------------------
-day 04    1.066 ms  5.677 ms  
-day 05    140.4 ms  140.0 ms  
-day 06    0.015 ms  0.050 ms  
-day 07    0.041 ms  0.043 ms  
-day 08    0.916 ms  1.838 ms  
-day 09    0.930 ms  3.137 ms  
-day 12    10.11 ms  257.9 ms  
-day 13    0.076 ms  0.140 ms  
-day 14    0.483 ms  2.807 ms  
-day 15    3.602 ms  117.9 ms  
-day 16    0.104 ms  0.107 ms  
-day 17    17.80 ms  15.00 ms  
-day 18    38.45 ms  536.5 ms  
-day 19    622.5 ms  657.0 ms  
-day 20    0.490 ms  13.01 ms  
+day 04    1.012 ms  5.264 ms  
+day 05    137.7 ms  139.2 ms  
+day 06    0.014 ms  0.047 ms  
+day 07    0.038 ms  0.041 ms  
+day 08    0.874 ms  1.655 ms  
+day 09    0.933 ms  3.064 ms  
+day 12    9.341 ms  239.9 ms  
+day 13    0.073 ms  0.137 ms  
+day 14    0.455 ms  2.625 ms  
+day 15    3.415 ms  115.2 ms  
+day 16    0.093 ms  0.096 ms  
+day 17    16.62 ms  14.02 ms  
+day 18    35.94 ms  497.0 ms  
+day 19    537.7 ms  562.6 ms  
+day 20    0.434 ms  11.33 ms  
+day 21    0.003 ms  8.272 ms  
 ```
 
 ## Daily notes
@@ -103,3 +104,7 @@ Faster HashSet and parallelization made it quite fast though.
 ### 20
 
 2D convolution with out-of-bounds value selection.
+
+### 21
+
+Recursion with memoization.
