@@ -18,7 +18,6 @@ impl Point {
     }
 }
 
-
 impl std::ops::Add for Point {
     type Output = Point;
 
@@ -31,13 +30,13 @@ impl std::ops::Add for Point {
 macro_rules! p {
     ($x:expr, $y:expr) => {
         Point::new($x, $y)
-    }
+    };
 }
 
-pub struct Grid<T> {
+pub struct Grid<T: std::clone::Clone> {
     positions: Vec<Vec<T>>,
 }
-impl<T> Grid<T> {
+impl<T: std::clone::Clone> Grid<T> {
     pub fn from_rows(rows: impl Iterator<Item = Vec<T>>) -> Result<Self, GridError> {
         let collected_rows = rows.collect::<Vec<_>>();
 
@@ -48,6 +47,10 @@ impl<T> Grid<T> {
                 positions: collected_rows,
             })
         }
+    }
+
+    pub fn full(width: usize, height: usize, fill_value: T) -> Self {
+        Grid::from_rows(vec![vec![fill_value; width]; height].into_iter()).unwrap()
     }
 
     pub fn height(&self) -> usize {
@@ -71,7 +74,8 @@ impl<T> Grid<T> {
     }
 
     pub fn contains(&self, p: &Point) -> bool {
-        (p.x >= 0 && (max(p.x, 0) as usize) < self.width()) && (p.y >= 0 && (max(p.y, 0) as usize) < self.height())
+        (p.x >= 0 && (max(p.x, 0) as usize) < self.width())
+            && (p.y >= 0 && (max(p.y, 0) as usize) < self.height())
     }
 
     pub fn at(&self, p: &Point) -> Result<&T, GridError> {
@@ -81,6 +85,15 @@ impl<T> Grid<T> {
             Err(GridError::AccessError)
         }
     }
+
+    pub fn at_mut(&mut self, p: &Point) -> Result<&mut T, GridError> {
+        if self.contains(p) {
+            Ok(&mut self.positions[p.y as usize][p.x as usize])
+        } else {
+            Err(GridError::AccessError)
+        }
+    }
+
     pub fn at_xy(&self, x: usize, y: usize) -> Result<&T, GridError> {
         self.at(&Point::new(x as i32, y as i32))
     }
@@ -97,11 +110,33 @@ impl<T> Grid<T> {
         .filter(|(_p, _v)| _v.is_ok())
         .map(|(_p, _v)| (*_p, _v.unwrap()))
         .collect::<Vec<_>>()
-
     }
     pub fn four_neighborhood_at_xy(&self, x: usize, y: usize) -> Vec<(Point, &T)> {
         self.four_neighborhood_at(&Point::new(x as i32, y as i32))
     }
+
+    pub fn eight_neighborhood_at(&self, p: &Point) -> Vec<(Point, &T)> {
+        [
+            Point::new(p.x - 1, p.y),
+            Point::new(p.x + 1, p.y),
+            Point::new(p.x, p.y - 1),
+            Point::new(p.x - 1, p.y - 1),
+            Point::new(p.x + 1, p.y - 1),
+            Point::new(p.x, p.y + 1),
+            Point::new(p.x - 1, p.y + 1),
+            Point::new(p.x + 1, p.y + 1),
+        ]
+        .iter()
+        .map(|_p| (_p, self.at(_p)))
+        .filter(|(_p, _v)| _v.is_ok())
+        .map(|(_p, _v)| (*_p, _v.unwrap()))
+        .collect::<Vec<_>>()
+    }
+
+    pub fn eight_neighborhood_xy(&self, x: usize, y: usize) -> Vec<(Point, &T)> {
+        self.eight_neighborhood_at(&Point::new(x as i32, y as i32))
+    }
+
     pub fn iter_points(&self) -> GridPointIterator<T> {
         GridPointIterator {
             index: 0,
@@ -114,27 +149,38 @@ impl<T> Grid<T> {
     pub fn iter(&self) -> impl Iterator<Item = (Point, &T)> {
         self.iter_points().map(|p| (p, self.at(&p).unwrap()))
     }
+
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = (Point, &mut T)> {
+        self.positions
+            .iter_mut()
+            .enumerate()
+            .map(|(y, row)| {
+                row.iter_mut()
+                    .enumerate()
+                    .map(move |(x, val)| (Point::new(x as i32, y as i32), val))
+            })
+            .flatten()
+    }
 }
 
-impl<T> fmt::Debug for Grid<T> {
+impl<T: std::clone::Clone> fmt::Debug for Grid<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Grid{{ w: {}, h: {} }}", self.width(), self.height())
     }
 }
 
-impl<T> FromIterator<Vec<T>> for Grid<T> {
-
+impl<T: std::clone::Clone> FromIterator<Vec<T>> for Grid<T> {
     fn from_iter<M: IntoIterator<Item = Vec<T>>>(iter: M) -> Self {
-       Self::from_rows(iter.into_iter()).unwrap()
+        Self::from_rows(iter.into_iter()).unwrap()
     }
 }
 
-pub struct GridPointIterator<'a, T> {
+pub struct GridPointIterator<'a, T: std::clone::Clone> {
     index: usize,
     grid: &'a Grid<T>,
 }
 
-impl<'a, T> Iterator for GridPointIterator<'a, T> {
+impl<'a, T: std::clone::Clone> Iterator for GridPointIterator<'a, T> {
     type Item = Point;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -189,7 +235,11 @@ mod tests_grid {
         assert_eq!(g.at_xy(0, 0).unwrap(), &1);
         assert_eq!(g.at_xy(100, 100).err().unwrap(), GridError::AccessError);
         assert_eq!(
-            g.four_neighborhood_at_xy(1, 1).iter().cloned().map(|(p, v)| v).collect::<Vec<_>>(),
+            g.four_neighborhood_at_xy(1, 1)
+                .iter()
+                .cloned()
+                .map(|(p, v)| v)
+                .collect::<Vec<_>>(),
             [4, 6, 2].iter().collect::<Vec<_>>()
         );
         assert_eq!(

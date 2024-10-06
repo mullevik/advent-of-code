@@ -1,42 +1,154 @@
-use std::ops::Range;
+use std::{
+    cmp::{max, min},
+    ops::Range,
+};
 
 use itertools::Itertools;
 
-const WORLD_SIZE: usize = 101;
 const WORLD_OFFSET: i32 = 50;
 
 pub fn first_part(input: &str) -> i64 {
-    let ops = parse(input);
-    let mut world = vec![vec![vec![false; WORLD_SIZE]; WORLD_SIZE]; WORLD_SIZE];
+    build_world(&parse(input))
+        .into_iter()
+        .map(|c| clamp(&c))
+        .map(|c| volume(&c))
+        .sum::<i64>()
+}
+pub fn second_part(input: &str) -> i64 {
+    build_world(&parse(input))
+        .into_iter()
+        .map(|c| volume(&c))
+        .sum::<i64>()
+}
 
-    for (i, op) in ops.iter().enumerate() {
-        for x in offset_to_usize(&op.ranges.0, WORLD_OFFSET) {
-            for y in offset_to_usize(&op.ranges.1, WORLD_OFFSET) {
-                for z in offset_to_usize(&op.ranges.2, WORLD_OFFSET) {
-                    if x < WORLD_SIZE && y < WORLD_SIZE && z < WORLD_SIZE {
-                        world[x][y][z] = op.value;
-                    }
-                }
-            }
-        }
-    }
-    world
-        .iter()
-        .flat_map(|v| v.iter().flat_map(|v| v.iter()))
-        .filter(|x| **x)
-        .count() as i64
-}
-pub fn second_part(input: &str) -> i32 {
-    todo!()
-}
+type Cuboid = (Range<i32>, Range<i32>, Range<i32>);
 
 struct Operation {
     value: bool,
-    ranges: (Range<i32>, Range<i32>, Range<i32>),
+    cuboid: Cuboid,
 }
 
 fn offset_to_usize(r: &Range<i32>, offset: i32) -> Range<usize> {
     (r.start + offset) as usize..(r.end + offset + 1) as usize
+}
+
+fn volume(c: &Cuboid) -> i64 {
+    let x =
+        (c.0.end - c.0.start) as i64 * (c.1.end - c.1.start) as i64 * (c.2.end - c.2.start) as i64;
+    if x < 0 {
+        println!("negative cuboid: {:?}", c);
+    }
+    x
+}
+
+fn clamp_range(r: &Range<i32>) -> Range<i32> {
+    min(max(r.start, -WORLD_OFFSET), WORLD_OFFSET + 1)
+        ..min(max(r.end, -WORLD_OFFSET), WORLD_OFFSET + 1)
+}
+
+fn clamp(c: &Cuboid) -> Cuboid {
+    (clamp_range(&c.0), clamp_range(&c.1), clamp_range(&c.2))
+}
+
+enum Intersection {
+    Double(Range<i32>),
+    Single(i32),
+}
+
+fn is_range_overlap(a: &Range<i32>, b: &Range<i32>) -> bool {
+    (b.start >= a.start && b.start < a.end)
+        || (b.end > a.start && b.end <= a.end)
+        || (a.start >= b.start && a.start < b.end)
+        || (a.end > b.start && a.end <= b.end)
+}
+
+fn is_cuboid_overlap(a: &Cuboid, b: &Cuboid) -> bool {
+    is_range_overlap(&a.0, &b.0) && is_range_overlap(&a.1, &b.1) && is_range_overlap(&a.2, &b.2)
+}
+
+fn cut_range(base: &Range<i32>, to_cut: &Range<i32>) -> (Range<i32>, Range<i32>) {
+    (
+        min(to_cut.start, base.start)..base.start,
+        base.end..max(to_cut.end, base.end),
+    )
+}
+
+// fn build_world(ops: &[Operation]) -> i32 {
+//     let mut world = vec![];
+
+//     for op in ops {
+//         let mut stack = vec![];
+
+//         let overlapping = world
+//             .iter()
+//             .filter(|b| is_cuboid_overlap(b, &op.cuboid))
+//             .collect::<Vec<_>>();
+
+//         for overlapping_cuboid in overlapping {}
+//     }
+
+//     todo!();
+// }
+
+fn modify_world_by_adding(world: &mut Vec<Cuboid>, new: &Cuboid) {
+    let mut stack = vec![new.clone()];
+    // let mut accumulator = vec![];
+
+    while let Some(current) = stack.pop() {
+        let world_overlap = world.iter().find(|b| is_cuboid_overlap(b, &current));
+
+        if let Some(overlap) = world_overlap {
+            cut_into_non_empty_cuboids(overlap, &current).for_each(|c| stack.push(c));
+        } else {
+            world.push(current);
+        }
+    }
+}
+
+fn cut_into_non_empty_cuboids(base: &Cuboid, to_cut: &Cuboid) -> impl Iterator<Item = Cuboid> {
+    let new_x = cut_range(&base.0, &to_cut.0);
+    let new_y = cut_range(&base.1, &to_cut.1);
+    let new_z = cut_range(&base.2, &to_cut.2);
+
+    [
+        (new_x.0, to_cut.1.clone(), to_cut.2.clone()),
+        (new_x.1, to_cut.1.clone(), to_cut.2.clone()),
+        (to_cut.0.clone(), new_y.0, to_cut.2.clone()),
+        (to_cut.0.clone(), new_y.1, to_cut.2.clone()),
+        (to_cut.0.clone(), to_cut.1.clone(), new_z.0),
+        (to_cut.0.clone(), to_cut.1.clone(), new_z.1),
+    ]
+    .into_iter()
+    .filter(|c| volume(c) > 0)
+}
+
+fn subtract_from_world(world: Vec<Cuboid>, new: &Cuboid) -> Vec<Cuboid> {
+    let mut new_world = Vec::with_capacity(world.len());
+
+    for existing in world.iter() {
+        if is_cuboid_overlap(new, existing) {
+            cut_into_non_empty_cuboids(new, existing)
+                .for_each(|c| modify_world_by_adding(&mut new_world, &c));
+        } else {
+            new_world.push(existing.clone());
+        }
+    }
+
+    new_world
+}
+
+fn build_world(ops: &[Operation]) -> Vec<Cuboid> {
+    let mut world = vec![];
+
+    for op in ops {
+        if op.value {
+            modify_world_by_adding(&mut world, &op.cuboid);
+        } else {
+            world = subtract_from_world(world, &op.cuboid);
+        }
+    }
+
+    world
 }
 
 fn parse(input: &str) -> Vec<Operation> {
@@ -51,13 +163,13 @@ fn parse(input: &str) -> Vec<Operation> {
 
             Operation {
                 value: is_on,
-                ranges: (
+                cuboid: (
                     _x_from.split_once('=').unwrap().1.parse::<i32>().unwrap()
-                        .._x_to.parse::<i32>().unwrap(),
+                        .._x_to.parse::<i32>().unwrap() + 1,
                     _y_from.split_once('=').unwrap().1.parse::<i32>().unwrap()
-                        .._y_to.parse::<i32>().unwrap(),
+                        .._y_to.parse::<i32>().unwrap() + 1,
                     _z_from.split_once('=').unwrap().1.parse::<i32>().unwrap()
-                        .._z_to.parse::<i32>().unwrap(),
+                        .._z_to.parse::<i32>().unwrap() + 1,
                 ),
             }
         })
@@ -67,6 +179,11 @@ fn parse(input: &str) -> Vec<Operation> {
 #[cfg(test)]
 mod tests_day_22 {
     use super::*;
+
+    const SMALL_EXAMPLE_INPUT: &str = "on x=10..12,y=10..12,z=10..12
+on x=11..13,y=11..13,z=11..13
+off x=9..11,y=9..11,z=9..11
+on x=10..10,y=10..10,z=10..10";
 
     const EXAMPLE_INPUT: &str = "on x=-20..26,y=-36..17,z=-47..7
 on x=-20..33,y=-21..23,z=-26..28
@@ -95,27 +212,70 @@ on x=967..23432,y=45373..81175,z=27513..53682";
     fn test_parse() {
         let ops = parse(EXAMPLE_INPUT);
         assert_eq!(ops.len(), 22);
-        assert_eq!(ops[0].ranges, (-20..26, -36..17, -47..7));
+        assert_eq!(ops[0].cuboid, (-20..27, -36..18, -47..8));
         assert!(ops[0].value);
         assert!(!ops[10].value);
         assert_eq!(
-            ops[ops.len() - 1].ranges,
-            (967..23432, 45373..81175, 27513..53682)
+            ops[ops.len() - 1].cuboid,
+            (967..23433, 45373..81176, 27513..53683)
         );
     }
 
     #[test]
+    fn test_overlaps() {
+        let a = (0..3, 0..3, 0..3);
+        let b = (1..5, 0..3, 0..3);
+        let c = (-1..2, -300..-200, -300..-200);
+
+        assert_eq!(volume(&a), 27);
+        assert_eq!(volume(&b), 36);
+        assert_eq!(volume(&c), 30000);
+        assert!(is_cuboid_overlap(&a, &b));
+        assert!(!is_cuboid_overlap(&a, &c))
+    }
+
+    #[test]
+    fn test_cut_by_world() {
+        let mut world = vec![(0..3, 0..3, 0..3)];
+
+        modify_world_by_adding(&mut world, &(2..5, 2..5, 2..5));
+
+        assert_eq!(
+            world,
+            vec![
+                (0..3, 0..3, 0..3),
+                (2..5, 2..5, 3..5),
+                (2..5, 3..5, 2..3),
+                (3..5, 2..3, 2..3)
+            ]
+        );
+        assert_eq!(world.iter().map(volume).sum::<i64>(), 53);
+    }
+
+    #[test]
+    fn test_subtract_from_world() {
+        let world = vec![(0..3, 0..3, 0..3)];
+
+        let new_world = subtract_from_world(world, &(2..5, 2..5, 2..5));
+
+        assert_eq!(
+            new_world,
+            vec![(0..2, 0..3, 0..3), (2..3, 0..2, 0..3), (2..3, 2..3, 0..2)]
+        );
+        assert_eq!(new_world.iter().map(volume).sum::<i64>(), 26);
+    }
+
+    #[test]
     fn test_example_first_part() {
+        assert_eq!(first_part(SMALL_EXAMPLE_INPUT), 39);
         assert_eq!(first_part(EXAMPLE_INPUT), 590784);
     }
     #[test]
     fn test_first_part() {
         assert_eq!(first_part(include_str!("../inputs/22.in")), 647076);
-
-        // fixme: terribly sloooow!
     }
-    // #[test]
-    // fn test_second_part() {
-    //     assert_eq!(second_part(include_str!("../inputs/22.in")), -1);
-    // }
+    #[test]
+    fn test_second_part() {
+        assert_eq!(second_part(include_str!("../inputs/22.in")), -1);
+    }
 }

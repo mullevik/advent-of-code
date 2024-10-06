@@ -1,22 +1,24 @@
 ```
 day       part 1    part 2    
 ------------------------------
-day 04    1.012 ms  5.264 ms  
-day 05    137.7 ms  139.2 ms  
-day 06    0.014 ms  0.047 ms  
-day 07    0.038 ms  0.041 ms  
-day 08    0.874 ms  1.655 ms  
-day 09    0.933 ms  3.064 ms  
-day 12    9.341 ms  239.9 ms  
-day 13    0.073 ms  0.137 ms  
-day 14    0.455 ms  2.625 ms  
-day 15    3.415 ms  115.2 ms  
-day 16    0.093 ms  0.096 ms  
-day 17    16.62 ms  14.02 ms  
-day 18    35.94 ms  497.0 ms  
-day 19    537.7 ms  562.6 ms  
-day 20    0.434 ms  11.33 ms  
-day 21    0.003 ms  8.272 ms  
+day 04    1.390 ms  10.07 ms  
+day 05    189.2 ms  161.3 ms  
+day 06    0.016 ms  0.052 ms  
+day 07    0.048 ms  0.046 ms  
+day 08    0.966 ms  1.925 ms  
+day 09    0.998 ms  3.314 ms  
+day 10    0.064 ms  0.065 ms  
+day 12    12.12 ms  286.6 ms  
+day 13    0.092 ms  0.154 ms  
+day 14    0.658 ms  3.096 ms  
+day 15    3.981 ms  131.0 ms  
+day 16    0.097 ms  0.102 ms  
+day 17    12.93 ms  13.22 ms  
+day 18    38.98 ms  519.3 ms  
+day 19    545.1 ms  583.9 ms  
+day 20    0.507 ms  13.03 ms  
+day 21    0.003 ms  9.366 ms  
+day 22    6936. ms  7222. ms  
 ```
 
 ## Daily notes
@@ -112,3 +114,8 @@ Faster HashSet and parallelization made it quite fast though.
 ### 21
 
 Recursion with memoization.
+
+### 22
+
+Intersections of cuboids in 3D.
+Implementation by cutting cuboids so that they do not overlap - stupid and slow but it works.

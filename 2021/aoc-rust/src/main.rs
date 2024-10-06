@@ -6,6 +6,7 @@ mod day_07;
 mod day_08;
 mod day_09;
 mod day_10;
+// mod day_11;
 mod day_12;
 mod day_13;
 mod day_14;
@@ -17,6 +18,7 @@ mod day_18;
 mod day_19;
 mod day_20;
 mod day_21;
+mod day_22;
 mod graph;
 mod grid;
 mod space;
@@ -26,8 +28,8 @@ use crate::benchmark::{benchmark_run, print_day, print_header};
 
 fn main() {
     benchmark_all!(
-        day_04, day_05, day_06, day_07, day_08, day_09, day_10, day_12, day_13, day_14, day_15, day_16,
-        day_17, day_18, day_19, day_20, day_21
+        day_04, day_05, day_06, day_07, day_08, day_09, day_10, day_12, day_13, day_14, day_15,
+        day_16, day_17, day_18, day_19, day_20, day_21, day_22
     )
     // benchmark_all!(day_20);
 }
