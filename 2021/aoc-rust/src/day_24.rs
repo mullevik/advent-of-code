@@ -1,16 +1,50 @@
 use std::ops::Range;
 
-use itertools::Itertools;
+use rustc_hash::FxHashSet;
 
-pub fn first_part(input: &str) -> i32 {
-    todo!()
+pub fn first_part(input: &str) -> i64 {
+    find_model_number_trying_digits(
+        &parse(include_str!("../inputs/24.in")),
+        &[9, 8, 7, 6, 5, 4, 3, 2, 1],
+    )
 }
-pub fn second_part(input: &str) -> i32 {
-    todo!()
+pub fn second_part(input: &str) -> i64 {
+    find_model_number_trying_digits(
+        &parse(include_str!("../inputs/24.in")),
+        &[1, 2, 3, 4, 5, 6, 7, 8, 9],
+    )
 }
+
+fn find_model_number_trying_digits(operations: &[Operation], digits: &[i32]) -> i64 {
+    let modules = split_into_modules(operations);
+    let mut banned_states = FxHashSet::default();
+    find_model_number(0, 0, 0, &modules, &mut banned_states, digits).unwrap()
+}
+
 type Registers = [i32; 4];
 
 const EMPTY_REGISTERS: Registers = [0, 0, 0, 0];
+const MAX_ALU_VALUE: i32 = 10_000_000;
+
+#[derive(Debug, Clone, Copy)]
+enum Symbol {
+    Constant(i32),
+    VariableIndex(usize),
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Operation {
+    Inp(Symbol),
+    Add(Symbol, Symbol),
+    Mul(Symbol, Symbol),
+    Div(Symbol, Symbol),
+    Mod(Symbol, Symbol),
+    Eql(Symbol, Symbol),
+}
+
+struct Module {
+    operations: Vec<Operation>,
+}
 
 fn execute(operations: &[Operation], inputs: &[i32], starting_registers: &Registers) -> Registers {
     let mut registers: Registers = *starting_registers;
@@ -55,40 +89,9 @@ fn value(s: Symbol, registers: &Registers) -> i32 {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-enum Symbol {
-    Constant(i32),
-    VariableIndex(usize),
-}
-
-#[derive(Debug, Clone, Copy)]
-enum Operation {
-    Inp(Symbol),
-    Add(Symbol, Symbol),
-    Mul(Symbol, Symbol),
-    Div(Symbol, Symbol),
-    Mod(Symbol, Symbol),
-    Eql(Symbol, Symbol),
-}
-
-struct Module {
-    operations: Vec<Operation>,
-}
-
 impl Module {
     fn execute(&self, carry: i32, input: i32) -> Registers {
         execute(&self.operations, &[input], &[0, 0, carry, 0])
-    }
-
-    fn possible_carries_and_inputs_for(
-        &self,
-        target_carry: i32,
-        space: Range<i32>,
-    ) -> Vec<(i32, i32)> {
-        space
-            .cartesian_product(1..10)
-            .filter(|(carry, input)| self.execute(*carry, *input)[2] == target_carry)
-            .collect::<Vec<_>>()
     }
 }
 
@@ -141,69 +144,79 @@ fn parse(input: &str) -> Vec<Operation> {
         .collect::<Vec<Operation>>()
 }
 
-fn split_into_modules(operations: &[Operation]) -> Vec<Vec<Operation>> {
+fn split_into_modules(operations: &[Operation]) -> Vec<Module> {
     let mut modules = vec![];
     for op in operations {
         if let Operation::Inp(_) = op {
-            modules.push(vec![*op]);
+            modules.push(Module {
+                operations: vec![*op],
+            });
         } else {
             let mut last_module = modules
                 .last_mut()
                 .expect("No previous module found - does the sequence start with 'inp'?");
-            last_module.push(*op);
+            last_module.operations.push(*op);
         }
     }
     modules
 }
 
+fn find_model_number(
+    model_number: i64,
+    z_carry: i32,
+    module_idx: usize,
+    modules: &[Module],
+    banned_states: &mut FxHashSet<(i32, usize)>,
+    input_digits: &[i32],
+) -> Option<i64> {
+    if banned_states.contains(&(z_carry, module_idx)) {
+        return None;
+    }
+
+    if module_idx >= modules.len() {
+        return None;
+    }
+
+    if z_carry >= MAX_ALU_VALUE || z_carry <= -MAX_ALU_VALUE {
+        return None; // z_carry got out of hand -> ignore such states
+    }
+
+    let module = &modules[module_idx];
+
+    for input_digit in input_digits {
+        let registers = module.execute(z_carry, *input_digit);
+        let produced_z_val = registers[2];
+        let produced_model_number = model_number * 10 + (*input_digit) as i64;
+
+        if module_idx == 13 && produced_z_val == 0 {
+            return Some(produced_model_number);
+        }
+
+        let new_model_number = find_model_number(
+            produced_model_number,
+            produced_z_val,
+            module_idx + 1,
+            modules,
+            banned_states,
+            input_digits,
+        );
+
+        if let Some(n) = new_model_number {
+            return Some(n);
+        }
+    }
+
+    banned_states.insert((z_carry, module_idx));
+
+    None
+}
+
 #[cfg(test)]
 mod tests_day_24 {
-    use std::collections::HashSet;
-
-    use itertools::Itertools;
 
     use super::*;
 
     const EXAMPLE_INPUT: &str = "inp z\ninp x\nmul z 3\neql z x";
-
-    const MODULE_FOR_DIGIT_14: &str = "
-inp w
-mul x 0
-add x z
-mod x 26
-div z 26
-add x -3
-eql x w
-eql x 0
-mul y 0
-add y 25
-mul y x
-add y 1
-mul z y
-mul y 0
-add y w
-add y 12
-mul y x
-add z y";
-
-    const MODULE_FOR_DIGIT_13: &str = "inp w
-mul x 0
-add x z
-mod x 26
-div z 26
-add x -9
-eql x w
-eql x 0
-mul y 0
-add y 25
-mul y x
-add y 1
-mul z y
-mul y 0
-add y w
-add y 12
-mul y x
-add z y";
 
     #[test]
     fn test_parse_operations() {
@@ -217,8 +230,8 @@ add z y";
     fn test_modules() {
         let modules = split_into_modules(&parse(EXAMPLE_INPUT));
         assert_eq!(modules.len(), 2);
-        assert_eq!(modules[0].len(), 1);
-        assert_eq!(modules[1].len(), 3);
+        assert_eq!(modules[0].operations.len(), 1);
+        assert_eq!(modules[1].operations.len(), 3);
     }
 
     #[test]
@@ -229,34 +242,12 @@ add z y";
     }
 
     #[test]
-    fn test_module_values() {
-        let module_14 = Module {
-            operations: parse(MODULE_FOR_DIGIT_14),
-        };
-        let module_13 = Module {
-            operations: parse(MODULE_FOR_DIGIT_13),
-        };
-
-        let possibilities_for_14 = module_14.possible_carries_and_inputs_for(0, -1000..1000);
-
-        // let possibilities_for_13 = possibilities_for_14
-        //     .iter()
-        //     .flat_map(|(carry, _)| module_13.possible_carries_and_inputs_for(*carry, -1000..1000))
-        //     .collect::<Vec<_>>();
-        let possibilities_for_13 = module_13.possible_carries_and_inputs_for(4, -1000..1000);
-        println!("pos 14 {:?}", possibilities_for_14);
-        println!("pos 13 {:?}", possibilities_for_13);
-
-        let r = module_13.execute(122, 9);
-        assert_eq!(module_14.execute(r[2], 1)[2], 0);
+    fn test_first_part() {
+        assert_eq!(first_part(include_str!("../inputs/24.in")), 39924989499969);
     }
 
-    // #[test]
-    // fn test_first_part() {
-    //     assert_eq!(first_part(include_str!("../inputs/.in")), -1);
-    // }
-    // #[test]
-    // fn test_second_part() {
-    //     assert_eq!(second_part(include_str!("../inputs/.in")), -1);
-    // }
+    #[test]
+    fn test_second_part() {
+        assert_eq!(second_part(include_str!("../inputs/24.in")), -1);
+    }
 }

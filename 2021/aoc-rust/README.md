@@ -19,6 +19,7 @@ day 19    545.1 ms  583.9 ms
 day 20    0.507 ms  13.03 ms  
 day 21    0.003 ms  9.366 ms  
 day 22    6936. ms  7222. ms  
+day 24    553.2 ms  52.17 ms  
 ```
 
 ## Daily notes
@@ -119,3 +120,11 @@ Recursion with memoization.
 
 Intersections of cuboids in 3D.
 Implementation by cutting cuboids so that they do not overlap - stupid and slow but it works.
+
+
+
+### 24
+
+Simulation of CPU's ALU with interesting search problem for input digits.
+
+Solved by memoization after getting hint on r/adventofcode.
