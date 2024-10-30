@@ -20,6 +20,7 @@ day 20    0.507 ms  13.03 ms
 day 21    0.003 ms  9.366 ms  
 day 22    6936. ms  7222. ms  
 day 24    553.2 ms  52.17 ms  
+day 25    580.9 ms  0.000 ms  
 ```
 
 ## Daily notes
@@ -128,3 +129,7 @@ Implementation by cutting cuboids so that they do not overlap - stupid and slow 
 Simulation of CPU's ALU with interesting search problem for input digits.
 
 Solved by memoization after getting hint on r/adventofcode.
+
+### 25
+
+Simple simulation in 2D environment.
