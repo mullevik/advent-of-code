@@ -1,60 +1,77 @@
+use std::collections::VecDeque;
+
 use crate::grid::{Grid, Point};
+
+const N_STEPS_FIRST_PART: usize = 100;
 
 pub fn first_part(input: &str) -> i32 {
     let mut octopus_map = parse(input);
+    let mut n_flashes = 0;
 
-    todo!();
-}
-
-pub fn second_part(input: &str) -> i32 {
-    todo!()
-}
-
-fn get_flashes_from_step(octopus_map: &mut Grid<i32>) -> i32 {
-    octopus_map.iter_mut().for_each(|(_, val)| *val += 1);
-
-    let mut flash_map = Grid::full(octopus_map.width(), octopus_map.height(), false);
-
-    let mut n_flashes = flash_check(octopus_map, &mut flash_map);
-    loop {
-        println!("{}", n_flashes);
-        for (p, has_flashed) in flash_map.iter() {
-            if has_flashed.to_owned() {
-                let neighbors = octopus_map
-                    .eight_neighborhood_at(&p)
-                    .into_iter()
-                    .map(|(p, _)| p)
-                    .collect::<Vec<_>>();
-                for adjacent in neighbors.iter() {
-                    if !flash_map.at(adjacent).unwrap() {
-                        *octopus_map.at_mut(adjacent).unwrap() += 1
-                    }
-                }
-            }
-        }
-
-        let n_flashes_after = flash_check(octopus_map, &mut flash_map);
-        if n_flashes_after > n_flashes {
-            n_flashes = n_flashes_after;
-        } else {
+    for (i, _) in std::iter::repeat(()).enumerate() {
+        n_flashes += compute_flash_map(&mut octopus_map)
+            .iter()
+            .filter(|(_, &val)| val)
+            .count() as i32;
+        if i + 1 >= N_STEPS_FIRST_PART {
             break;
         }
     }
-
-    // todo: stack based method is actually needed .... :(
-    // todo: this wont work :(
     n_flashes
 }
 
-fn flash_check(octopus_map: &mut Grid<i32>, flash_map: &mut Grid<bool>) -> i32 {
-    for (p, val) in octopus_map.iter_mut() {
+pub fn second_part(input: &str) -> i32 {
+    let mut octopus_map = parse(input);
+
+    for (i, _) in std::iter::repeat(()).enumerate() {
+        if compute_flash_map(&mut octopus_map)
+            .iter()
+            .all(|(_, &val)| val)
+        {
+            return i as i32 + 1;
+        }
+    }
+    unreachable!()
+}
+
+fn compute_flash_map(octopus_map: &mut Grid<i32>) -> Grid<bool> {
+    let mut flash_map = Grid::full(octopus_map.width(), octopus_map.height(), false);
+
+    octopus_map.iter_mut().for_each(|(_, val)| *val += 1);
+
+    let mut to_check_stack: VecDeque<Point> = VecDeque::default();
+
+    for (p, val) in octopus_map.iter() {
         if *val > 9 {
-            *flash_map.at_mut(&p).unwrap() = true;
-            *val = 0;
+            to_check_stack.push_back(p);
         }
     }
 
-    flash_map.iter_values().filter(|x| **x).count() as i32
+    while let Some(to_check) = to_check_stack.pop_front() {
+        if *flash_map.at(&to_check).unwrap() {
+            continue;
+        }
+        *flash_map.at_mut(&to_check).unwrap() = true;
+        *octopus_map.at_mut(&to_check).unwrap() = 0;
+
+        let adjacent_points = octopus_map
+            .eight_neighborhood_at(&to_check)
+            .iter()
+            .map(|(p, _)| p)
+            .cloned()
+            .collect::<Vec<_>>();
+        for adj in adjacent_points {
+            if !(*flash_map.at(&adj).unwrap()) {
+                *octopus_map.at_mut(&adj).unwrap() += 1;
+
+                if *octopus_map.at(&adj).unwrap() > 9 {
+                    to_check_stack.push_back(adj);
+                }
+            }
+        }
+    }
+
+    flash_map
 }
 
 fn parse(input: &str) -> Grid<i32> {
@@ -93,18 +110,18 @@ mod tests_day_11 {
     }
 
     #[test]
-    fn test_step() {
-        let mut g = parse(EXAMPLE_INPUT);
-        let n_step_1_flashes = get_flashes_from_step(&mut g);
-        let n_step_2_flashes = get_flashes_from_step(&mut g);
-
-        assert_eq!(n_step_1_flashes, 0);
-        assert_eq!(n_step_2_flashes, 35);
+    fn test_example_first_part() {
+        assert_eq!(first_part(EXAMPLE_INPUT), 1656);
     }
 
     #[test]
     fn test_first_part() {
-        assert_eq!(first_part(include_str!("../inputs/11.in")), -1);
+        assert_eq!(first_part(include_str!("../inputs/11.in")), 1627);
+    }
+
+    #[test]
+    fn test_example_second_part() {
+        assert_eq!(second_part(EXAMPLE_INPUT), 195);
     }
     #[test]
     fn test_second_part() {

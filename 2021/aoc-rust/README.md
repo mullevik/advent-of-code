@@ -8,6 +8,7 @@ day 07    0.048 ms  0.046 ms
 day 08    0.966 ms  1.925 ms  
 day 09    0.998 ms  3.314 ms  
 day 10    0.064 ms  0.065 ms  
+day 11    0.523 ms  1.391 ms  
 day 12    12.12 ms  286.6 ms  
 day 13    0.092 ms  0.154 ms  
 day 14    0.658 ms  3.096 ms  
@@ -65,6 +66,10 @@ Using custom grid implementation.
 
 Stack based parsing of matching brackets.
 
+
+### 11
+
+BFS algorithm in 2D grid.
 
 ### 12
 
