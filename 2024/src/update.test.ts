@@ -1,7 +1,7 @@
 import { buildTable, fetchLeaderBoard, getSheet, loadSecretsFromLocal, runBot, SHEET_TITLE, writeDataToSheet } from "./bot";
 
 
-test.skip('it is not snowing', async () => {
+test.skip('update google sheet with latest results', async () => {
     const auth = loadSecretsFromLocal();
     const members = await fetchLeaderBoard(auth.aocSessionCookie);
 
