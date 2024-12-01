@@ -5,11 +5,10 @@ import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadshee
 import { JWT } from 'google-auth-library';
 import { readFileSync } from 'fs';
 import { readText } from './utils';
-import { time } from 'console';
 
 const LEADERBOARD_URL = "https://adventofcode.com/2024/leaderboard/private/view/664050.json"
 const SHEET_ID = "1-Ap8xmA9MSLZgSNXwVgA8hLDGYOcGkEA8_OCrcDxREw";
-const SHEET_TITLE = "2024";
+export const SHEET_TITLE = "2024";
 
 interface GoogleCloudServiceAccount {
     client_email: string,
@@ -28,7 +27,6 @@ export async function writeDataToSheet(sheet: GoogleSpreadsheetWorksheet, data: 
     await sheet.clear();
     await sheet.setHeaderRow(data[0]);
     await sheet.addRows(data.slice(1));
-    console.log(`Written ${data.length} rows to ${sheet.title}`);
 }
 
 function formatDate(d: Date): string {
@@ -50,7 +48,7 @@ export function buildTable(members: Member[]): string[][] {
 
     let rows = [header];
 
-    const sortedMembers = [...members].sort((a, b) => (a.name < b.name ? -1 : 1));
+    const sortedMembers = [...members].sort((a, b) => (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1));
     for (const member of sortedMembers) {
         let row = [member.name];
 
@@ -119,7 +117,7 @@ export async function fetchLeaderBoard(sessionCookie: string): Promise<Member[]>
 
     const responseObject = await response.json();
 
-    return parseLeaderboardObject(responseObject);
+    return parseLeaderboardObject(responseObject).filter((m) => m.n_stars > 0);
 }
 
 export function parseLeaderboardObject(leaderboard: LeaderboardDTO): Member[] {
@@ -185,9 +183,10 @@ export async function runBot(auth: Auth, dryRun: boolean): Promise<Member[]> {
     const sheet = await getSheet(auth.googleServiceAccountJWT, SHEET_TITLE);
 
     if (dryRun) {
-        console.log(`Would write ${tableData.length} rows to google sheet '${sheet.title}'`)
+        console.log(`Would write ${tableData.length} rows to google sheet '${sheet.title}'`);
     } else {
         await writeDataToSheet(sheet, tableData);
+        console.log(`Written ${tableData.length} rows to google sheet '${sheet.title}'`);
     }
 
     const now = new Date();
@@ -198,9 +197,10 @@ export async function runBot(auth: Auth, dryRun: boolean): Promise<Member[]> {
     const slackMessageText = buildSlackMessage(solvers, winners, dayIndex);
 
     if (dryRun) {
-        console.log(`Would send ${slackMessageText} to ${SLACK_AOC_BOT_WEBHOOK_URL}`);
+        console.log(`Would send '${slackMessageText}' to ${SLACK_AOC_BOT_WEBHOOK_URL}`);
     } else {
-        sendSlackMessage(slackMessageText);
+        await sendSlackMessage(slackMessageText);
+        console.log(`Sent '${slackMessageText}' to ${SLACK_AOC_BOT_WEBHOOK_URL}`)
     }
 
     return members;
