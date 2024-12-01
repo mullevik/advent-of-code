@@ -14,5 +14,6 @@
 .gitignore
 
 node_modules
+build
 inputs
 # #!include:.gitignore

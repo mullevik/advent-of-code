@@ -5,8 +5,9 @@ import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadshee
 import { JWT } from 'google-auth-library';
 import { readFileSync } from 'fs';
 import { readText } from './utils';
+import { time } from 'console';
 
-const LEADERBOARD_URL = "https://adventofcode.com/2021/leaderboard/private/view/664050.json"
+const LEADERBOARD_URL = "https://adventofcode.com/2024/leaderboard/private/view/664050.json"
 const SHEET_ID = "1-Ap8xmA9MSLZgSNXwVgA8hLDGYOcGkEA8_OCrcDxREw";
 const SHEET_TITLE = "2024";
 
@@ -141,11 +142,11 @@ function parseMemberObject(member: MemberDTO): Member {
         let secondPart = null;
 
         if ("1" in completion) {
-            firstPart = new Date(completion["1"].get_star_ts);
+            firstPart = new Date(completion["1"].get_star_ts * 1000);
         }
 
         if ("2" in completion) {
-            secondPart = new Date(completion["2"].get_star_ts);
+            secondPart = new Date(completion["2"].get_star_ts * 1000);
         }
 
         completions[dayIndex] = { firstPart: firstPart, secondPart: secondPart };
@@ -189,8 +190,72 @@ export async function runBot(auth: Auth, dryRun: boolean): Promise<Member[]> {
         await writeDataToSheet(sheet, tableData);
     }
 
+    const now = new Date();
+    const before24Hours = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+    const [dayIndex, begin, end] = getDayIndexFromDate(now);
+    const solvers = getSolvers(members, dayIndex - 1, begin, end);
+    const winners = getWinners(members, before24Hours, now);
+    const slackMessageText = buildSlackMessage(solvers, winners, dayIndex);
+
+    if (dryRun) {
+        console.log(`Would send ${slackMessageText} to ${SLACK_AOC_BOT_WEBHOOK_URL}`);
+    } else {
+        sendSlackMessage(slackMessageText);
+    }
+
     return members;
 }
+
+const GOOGLE_SHEET_SHARING_LINK = "https://docs.google.com/spreadsheets/d/1-Ap8xmA9MSLZgSNXwVgA8hLDGYOcGkEA8_OCrcDxREw/edit?usp=sharing";
+
+function buildSlackMessage(solvers: string[], winners: Winner[], dayIndex: number): string {
+
+    const out = [];
+
+    if (winners.length > 0) {
+        for (const w of winners) {
+
+            out.push(`${w.name} won day ${w.dayIndex + 1} (${prettyTime(w.timeToSolveMs)} after announcement)`);
+        }
+    }
+
+    if (solvers.length > 0) {
+
+        out.push(`${solvers.join(", ")} solved day ${dayIndex + 1} in the same day it was announced`);
+    }
+
+    out.push(`See submission times at <${GOOGLE_SHEET_SHARING_LINK}>`)
+
+    return out.join("\n");
+}
+
+const SLACK_AOC_BOT_WEBHOOK_URL = "https://hooks.slack.com/services/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";
+
+async function sendSlackMessage(text: string): Promise<Response> {
+
+    const payload = {
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": text
+                }
+            }
+
+        ]
+    };
+    return await fetch(SLACK_AOC_BOT_WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+
+}
+
+
 
 interface Auth {
     aocSessionCookie: string,
@@ -203,5 +268,136 @@ export function loadSecretsFromLocal(): Auth {
     return {
         aocSessionCookie: loadAOCSessionCookie("./secret/aoc_session.env"),
         googleServiceAccountJWT: jwt,
+    }
+}
+
+interface Winner {
+    name: string
+    dayIndex: number
+    submissionDate: Date
+    timeToSolveMs: number
+}
+
+function compareMembersAtDay(a: Member, b: Member, dayIndex: number): number {
+    const a_val = a.completions[dayIndex].secondPart === null ? Infinity : a.completions[dayIndex].secondPart.getTime();
+    const b_val = b.completions[dayIndex].secondPart === null ? Infinity : b.completions[dayIndex].secondPart.getTime();
+    return a_val - b_val
+}
+
+export function getWinners(members: Member[], begin: Date, end: Date): Winner[] {
+
+    function safeSecondPart(m: Member, dayIndex: number): Date | null {
+        if (dayIndex < m.completions.length) {
+            return m.completions[dayIndex].secondPart;
+        }
+        return null;
+    }
+
+    const winners = [];
+    for (const i of Array(25).keys()) {
+
+        const sortedMembers = [...members].filter((m) => safeSecondPart(m, i) !== null).sort((a, b) => compareMembersAtDay(a, b, i));
+
+        if (sortedMembers.length > 0) {
+            const submissionDate = sortedMembers[0].completions[i].secondPart as Date;
+            winners.push({
+                name: sortedMembers[0].name,
+                dayIndex: i,
+                submissionDate: submissionDate,
+                timeToSolveMs: submissionDate.getTime() - AOC_STARTS[i].getTime(),
+            })
+        }
+    }
+
+    return winners.filter((w) => begin.getTime() <= w.submissionDate.getTime() && end.getTime() > w.submissionDate.getTime());
+}
+
+function timeOrInf(val: Date | null): number {
+    if (val === null) {
+        return Infinity;
+    }
+    return val.getTime();
+}
+
+const AOC_STARTS = [
+    new Date(1733029200000),
+    new Date(1733115600000),
+    new Date(1733202000000),
+    new Date(1733288400000),
+    new Date(1733374800000),
+    new Date(1733461200000),
+    new Date(1733547600000),
+    new Date(1733634000000),
+    new Date(1733720400000),
+    new Date(1733806800000),
+    new Date(1733893200000),
+    new Date(1733979600000),
+    new Date(1734066000000),
+    new Date(1734152400000),
+    new Date(1734238800000),
+    new Date(1734325200000),
+    new Date(1734411600000),
+    new Date(1734498000000),
+    new Date(1734584400000),
+    new Date(1734670800000),
+    new Date(1734757200000),
+    new Date(1734843600000),
+    new Date(1734930000000),
+    new Date(1735016400000),
+    new Date(1735102800000),
+];
+
+export function getDayIndexFromDate(x: Date): [number, Date, Date] {
+    const xTime = x.getTime();
+
+    for (var i = 0; i < AOC_STARTS.length; i++) {
+        const beginTime = AOC_STARTS[i].getTime();
+        const endTime = beginTime + 24 * 60 * 60 * 1000;  // add 24 hours
+
+        if (xTime >= beginTime && xTime < endTime) {
+            return [i, new Date(beginTime), new Date(endTime)];
+        }
+    }
+
+    return [24, AOC_STARTS[24], new Date(AOC_STARTS[24].getTime() + 24 * 60 * 60 * 1000)];
+}
+
+export function getSolvers(members: Member[], dayIndex: number, begin: Date, end: Date): string[] {
+
+    if (dayIndex < 0 || dayIndex >= AOC_STARTS.length) {
+        return [];
+    }
+
+    return members
+        .filter(
+            (m) => timeOrInf(m.completions[dayIndex].secondPart) >= begin.getTime()
+                && timeOrInf(m.completions[dayIndex].secondPart) < end.getTime()
+        )
+        .map((m) => m.name)
+}
+
+
+export function prettyTime(timeMs: number) {
+    let minutes = Math.floor(timeMs / (60 * 1000));
+    let hours = Math.floor(timeMs / (60 * 60 * 1000));
+    let days = Math.floor(timeMs / (24 * 60 * 60 * 1000));
+
+
+    let out = [];
+
+    if (days > 0) {
+        out.push(`${days} days`)
+    }
+    if (hours % 24 > 0) {
+        out.push(`${hours % 24} hours`)
+    }
+    if (minutes % 60 > 0) {
+        out.push(`${minutes % 60} minutes`)
+    }
+
+    if (out.length < 1) {
+        return `${timeMs} ms`;
+    } else {
+        return out.join(" ");
     }
 }

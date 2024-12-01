@@ -6,9 +6,8 @@
     "build": "tsc",
     "test": "jest",
     "lint": "eslint . --ext .ts",
-    "start-function-hw": "functions-framework --target=helloWorld --source=build/",
     "day": "npm run build && node build/cli.js",
-    "start": "functions-framework --target=helloWorld",
+    "start": "functions-framework --target=aocBotEntrypoint",
     "prestart": "npm run build",
     "gcp-build": "npm run build"
   },
