@@ -1,0 +1,35 @@
+{
+    "event": "2024",
+    "owner_id": 10,
+    "members": {
+        "12": {
+            "stars": 0,
+            "name": "foo",
+            "last_star_ts": 0,
+            "local_score": 0,
+            "global_score": 0,
+            "completion_day_level": {},
+            "id": 12
+        },
+        "11": {
+            "global_score": 0,
+            "id": 11,
+            "completion_day_level": {
+                "1": {
+                    "1": {
+                        "star_index": 53793,
+                        "get_star_ts": 1733048213
+                    },
+                    "2": {
+                        "get_star_ts": 1733048689,
+                        "star_index": 55320
+                    }
+                }
+            },
+            "stars": 2,
+            "last_star_ts": 1733048689,
+            "local_score": 22,
+            "name": "bar"
+        }
+    }
+}

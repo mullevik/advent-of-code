@@ -1,13 +1,16 @@
 {
   "name": "2024",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
     "build": "tsc",
     "test": "jest",
     "lint": "eslint . --ext .ts",
-    "start": "node build/index.js",
-    "day": "npm run build && node build/cli.js"
+    "start-function-hw": "functions-framework --target=helloWorld --source=build/",
+    "day": "npm run build && node build/cli.js",
+    "start": "functions-framework --target=helloWorld",
+    "prestart": "npm run build",
+    "gcp-build": "npm run build"
   },
   "author": "",
   "license": "MIT",
@@ -24,6 +27,9 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@google-cloud/functions-framework": "^3.4.2",
+    "google-auth-library": "^9.15.0",
+    "google-spreadsheet": "^4.1.4",
     "tmp": "^0.2.3"
   }
 }
