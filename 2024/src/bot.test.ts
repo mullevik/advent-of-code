@@ -4,8 +4,9 @@ import { readText } from "./utils";
 
 describe("aoc bot", () => {
     it("should be able to read/write to google sheets", async () => {
-        const auth = loadSecretsFromLocal()
-        const sheet = await getSheet(auth.googleServiceAccountJWT, "test");
+        console.log(process.env);
+        const secrets = loadSecretsFromLocal();
+        const sheet = await getSheet(secrets.googleServiceAccountJWT, secrets.googleSheetId, "test");
 
         await writeDataToSheet(sheet, [["foo", "bar"]]);
         await sheet.loadCells();
@@ -14,9 +15,9 @@ describe("aoc bot", () => {
     });
 
     it("should be able to read aoc leaderboard", async () => {
-        const auth = loadSecretsFromLocal();
+        const secrets = loadSecretsFromLocal();
 
-        const members = await fetchLeaderBoard(auth.aocSessionCookie);
+        const members = await fetchLeaderBoard(secrets.aocLeaderboardUrl, secrets.aocSessionCookie);
         expect(members.length).toBeGreaterThan(0);
     });
 
@@ -60,8 +61,8 @@ describe("aoc bot", () => {
     });
 
     it("should not fail on dry run", async () => {
-        const auth = loadSecretsFromLocal();
-        const members = await runBot(auth, true);
+        const secrets = loadSecretsFromLocal();
+        const members = await runBot(secrets, true);
         expect(members.length).toBeGreaterThan(0);
     });
 

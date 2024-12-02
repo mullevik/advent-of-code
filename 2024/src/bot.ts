@@ -1,14 +1,11 @@
 
 
 
-import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
-import { JWT } from 'google-auth-library';
+import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
+import { JWT } from 'google-auth-library';
+import { GoogleSpreadsheet, GoogleSpreadsheetWorksheet } from 'google-spreadsheet';
 import { readText } from './utils';
-
-const LEADERBOARD_URL = "https://adventofcode.com/2024/leaderboard/private/view/664050.json"
-const SHEET_ID = "1-Ap8xmA9MSLZgSNXwVgA8hLDGYOcGkEA8_OCrcDxREw";
-export const SHEET_TITLE = "2024";
 
 interface GoogleCloudServiceAccount {
     client_email: string,
@@ -16,8 +13,8 @@ interface GoogleCloudServiceAccount {
 }
 
 
-export async function getSheet(auth: JWT, sheetTitle: string): Promise<GoogleSpreadsheetWorksheet> {
-    const doc = new GoogleSpreadsheet(SHEET_ID, auth);
+export async function getSheet(auth: JWT, sheetId: string, sheetTitle: string): Promise<GoogleSpreadsheetWorksheet> {
+    const doc = new GoogleSpreadsheet(sheetId, auth);
     await doc.loadInfo();
     const sheet = await doc.sheetsByTitle[sheetTitle];
     return sheet;
@@ -30,11 +27,13 @@ export async function writeDataToSheet(sheet: GoogleSpreadsheetWorksheet, data: 
 }
 
 function formatDate(d: Date): string {
-    const zeroPadMonth = (d.getMonth() + 1).toString().padStart(2, "0");
-    const zeroPadDay = (d.getDate()).toString().padStart(2, "0");
-    const zeroPadHours = (d.getHours()).toString().padStart(2, "0");
-    const zeroPadMinutes = (d.getMinutes()).toString().padStart(2, "0");
-    return `${d.getFullYear()}-${zeroPadMonth}-${zeroPadDay} ${zeroPadHours}:${zeroPadMinutes}`
+
+    const csDateString = new Intl.DateTimeFormat("cs-CZ", { dateStyle: 'short', timeStyle: 'short', timeZone: "Europe/Prague" }).format(d);
+    const [firstPart, secondPart] = csDateString.split(" ");
+    const [day, month, year] = firstPart.split(".");
+
+
+    return `20${year}-${month}-${day} ${secondPart}`;
 }
 
 export function buildTable(members: Member[]): string[][] {
@@ -103,8 +102,8 @@ interface LeaderboardDTO {
 }
 
 
-export async function fetchLeaderBoard(sessionCookie: string): Promise<Member[]> {
-    const response = await fetch(LEADERBOARD_URL, {
+export async function fetchLeaderBoard(leaderboardUrl: string, sessionCookie: string): Promise<Member[]> {
+    const response = await fetch(leaderboardUrl, {
         method: 'GET',
         headers: {
             'Cookie': `session=${sessionCookie}`,
@@ -174,16 +173,19 @@ export function createGoogleSheetsJWT(email: string, key: string): JWT {
     })
 }
 
-export async function runBot(auth: Auth, dryRun: boolean): Promise<Member[]> {
+export async function runBot(secrets: Secrets, dryRun: boolean): Promise<Member[]> {
 
-    const members = await fetchLeaderBoard(auth.aocSessionCookie);
+    const members = await fetchLeaderBoard(secrets.aocLeaderboardUrl, secrets.aocSessionCookie);
 
     const tableData = buildTable(members);
 
-    const sheet = await getSheet(auth.googleServiceAccountJWT, SHEET_TITLE);
+    const sheet = await getSheet(secrets.googleServiceAccountJWT, secrets.googleSheetId, secrets.googleSheetTitle);
 
     if (dryRun) {
         console.log(`Would write ${tableData.length} rows to google sheet '${sheet.title}'`);
+        for (const row of tableData) {
+            console.log(row);
+        }
     } else {
         await writeDataToSheet(sheet, tableData);
         console.log(`Written ${tableData.length} rows to google sheet '${sheet.title}'`);
@@ -191,19 +193,16 @@ export async function runBot(auth: Auth, dryRun: boolean): Promise<Member[]> {
 
     const now = new Date();
     const before24Hours = new Date(now.getTime() - (24 * 60 * 60 * 1000));
-    const [dayIndex, begin, end] = getDayIndexFromDate(now);
     const [yesterDayIndex, yesterdayBegin, yesterdayEnd] = getDayIndexFromDate(before24Hours);
-    console.log(dayIndex, begin, end);
-    console.log(yesterDayIndex, yesterdayBegin, yesterdayEnd);
     const solvers = getSolvers(members, yesterDayIndex, yesterdayBegin, yesterdayEnd);
     const winners = getWinners(members, before24Hours, now);
-    const slackMessageText = buildSlackMessage(solvers, winners, yesterDayIndex);
+    const slackMessageText = buildSlackMessage(solvers, winners, yesterDayIndex, secrets.googleSheetSharingLink);
 
     if (dryRun) {
-        console.log(`Would send '${slackMessageText}' to ${SLACK_AOC_BOT_WEBHOOK_URL}`);
+        console.log(`Would send '${slackMessageText}' to ${secrets.slackWebhookUrl}`);
     } else {
-        await sendSlackMessage(slackMessageText);
-        console.log(`Sent '${slackMessageText}' to ${SLACK_AOC_BOT_WEBHOOK_URL}`)
+        const slackResponse = await sendSlackMessage(secrets.slackWebhookUrl, slackMessageText);
+        console.log(`Sent '${slackMessageText}' to ${secrets.slackWebhookUrl} with status ${slackResponse.status}`)
     }
 
     return members;
@@ -211,30 +210,28 @@ export async function runBot(auth: Auth, dryRun: boolean): Promise<Member[]> {
 
 const GOOGLE_SHEET_SHARING_LINK = "https://docs.google.com/spreadsheets/d/1-Ap8xmA9MSLZgSNXwVgA8hLDGYOcGkEA8_OCrcDxREw/edit?usp=sharing";
 
-function buildSlackMessage(solvers: string[], winners: Winner[], yesterDayIndex: number): string {
+function buildSlackMessage(solvers: string[], winners: Winner[], yesterDayIndex: number, sheetsSharingLink: string): string {
 
     const out = [];
 
     if (winners.length > 0) {
         for (const w of winners) {
 
-            out.push(`*${w.name}* won day ${w.dayIndex + 1} (${prettyTime(w.timeToSolveMs)} after announcement) :steam_locomotive:\n`);
+            out.push(`*${w.name}* won day ${w.dayIndex + 1} (${prettyTime(w.timeToSolveMs)} after announcement) :steam_locomotive:`);
         }
     }
 
     if (solvers.length > 0) {
         const sortedSolvers = [...solvers].sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? -1 : 1));
-        out.push(`${sortedSolvers.map((s) => `*${s}*`).join(", ")} solved day ${yesterDayIndex + 1} in the same day it was announced\n`);
+        out.push(`${sortedSolvers.map((s) => `*${s}*`).join(", ")} solved day ${yesterDayIndex + 1} in the same day it was announced`);
     }
 
-    out.push(`<${GOOGLE_SHEET_SHARING_LINK}|Submission times> updated`)
+    out.push(`<${sheetsSharingLink}|Completion times> updated`)
 
     return out.join("\n");
 }
 
-const SLACK_AOC_BOT_WEBHOOK_URL = "https://hooks.slack.com/services/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";
-
-async function sendSlackMessage(text: string): Promise<Response> {
+async function sendSlackMessage(slackWebhookUrl: string, text: string): Promise<Response> {
 
     const payload = {
         "blocks": [
@@ -248,7 +245,7 @@ async function sendSlackMessage(text: string): Promise<Response> {
 
         ]
     };
-    return await fetch(SLACK_AOC_BOT_WEBHOOK_URL, {
+    const response = await fetch(slackWebhookUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -256,21 +253,43 @@ async function sendSlackMessage(text: string): Promise<Response> {
         body: JSON.stringify(payload),
     })
 
+    if (!response.ok) {
+        throw Error(`Error sending slack message to ${slackWebhookUrl}: STATUS=${response.status}`)
+    }
+    return response
 }
 
 
 
-interface Auth {
+interface Secrets {
     aocSessionCookie: string,
     googleServiceAccountJWT: JWT,
+    slackWebhookUrl: string,
+    aocLeaderboardUrl: string,
+    googleSheetId: string,
+    googleSheetTitle: string,
+    googleSheetSharingLink: string,
 }
 
-export function loadSecretsFromLocal(): Auth {
-    const account = loadServiceAccountJWT("./secret/aoc-bot-443408-9cb9c6dd7dc7.json");
-    const jwt = createGoogleSheetsJWT(account.client_email, account.private_key);
+function requireEnvVar(envVar: string): string {
+    const val = process.env[envVar];
+    if (val === undefined || val === null) {
+        throw Error(`Undefined required env variable ${envVar}`);
+    }
+    return val;
+}
+
+export function loadSecretsFromLocal(): Secrets {
+    dotenv.config({ path: "secrets.env" });
+    const jwt = createGoogleSheetsJWT(requireEnvVar("GOOGLE_SERVICE_ACCOUNT_CLIENT_EMAIL"), requireEnvVar("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY"));
     return {
-        aocSessionCookie: loadAOCSessionCookie("./secret/aoc_session.env"),
+        aocSessionCookie: requireEnvVar("AOC_SESSION_COOKIE"),
         googleServiceAccountJWT: jwt,
+        slackWebhookUrl: requireEnvVar("SLACK_WEBHOOK_URL"),
+        aocLeaderboardUrl: requireEnvVar("AOC_LEADERBOARD_URL"),
+        googleSheetId: requireEnvVar("GOOGLE_SHEET_ID"),
+        googleSheetTitle: requireEnvVar("GOOGLE_SHEET_TITLE"),
+        googleSheetSharingLink: requireEnvVar("GOOGLE_SHEET_SHARING_LINK"),
     }
 }
 

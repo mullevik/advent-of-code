@@ -1,5 +1,6 @@
 node_modules/
 build/
 secret/
+secrets.env
 inputs/*
 aoc_session.env
