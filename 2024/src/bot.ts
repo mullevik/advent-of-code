@@ -192,9 +192,12 @@ export async function runBot(auth: Auth, dryRun: boolean): Promise<Member[]> {
     const now = new Date();
     const before24Hours = new Date(now.getTime() - (24 * 60 * 60 * 1000));
     const [dayIndex, begin, end] = getDayIndexFromDate(now);
-    const solvers = getSolvers(members, dayIndex - 1, begin, end);
+    const [yesterDayIndex, yesterdayBegin, yesterdayEnd] = getDayIndexFromDate(before24Hours);
+    console.log(dayIndex, begin, end);
+    console.log(yesterDayIndex, yesterdayBegin, yesterdayEnd);
+    const solvers = getSolvers(members, yesterDayIndex, yesterdayBegin, yesterdayEnd);
     const winners = getWinners(members, before24Hours, now);
-    const slackMessageText = buildSlackMessage(solvers, winners, dayIndex);
+    const slackMessageText = buildSlackMessage(solvers, winners, yesterDayIndex);
 
     if (dryRun) {
         console.log(`Would send '${slackMessageText}' to ${SLACK_AOC_BOT_WEBHOOK_URL}`);
@@ -208,23 +211,23 @@ export async function runBot(auth: Auth, dryRun: boolean): Promise<Member[]> {
 
 const GOOGLE_SHEET_SHARING_LINK = "https://docs.google.com/spreadsheets/d/1-Ap8xmA9MSLZgSNXwVgA8hLDGYOcGkEA8_OCrcDxREw/edit?usp=sharing";
 
-function buildSlackMessage(solvers: string[], winners: Winner[], dayIndex: number): string {
+function buildSlackMessage(solvers: string[], winners: Winner[], yesterDayIndex: number): string {
 
     const out = [];
 
     if (winners.length > 0) {
         for (const w of winners) {
 
-            out.push(`${w.name} won day ${w.dayIndex + 1} (${prettyTime(w.timeToSolveMs)} after announcement)`);
+            out.push(`*${w.name}* won day ${w.dayIndex + 1} (${prettyTime(w.timeToSolveMs)} after announcement) :steam_locomotive:\n`);
         }
     }
 
     if (solvers.length > 0) {
-
-        out.push(`${solvers.join(", ")} solved day ${dayIndex + 1} in the same day it was announced`);
+        const sortedSolvers = [...solvers].sort((a, b) => (a.toLowerCase() < b.toLowerCase() ? -1 : 1));
+        out.push(`${sortedSolvers.map((s) => `*${s}*`).join(", ")} solved day ${yesterDayIndex + 1} in the same day it was announced\n`);
     }
 
-    out.push(`See submission times at <${GOOGLE_SHEET_SHARING_LINK}>`)
+    out.push(`<${GOOGLE_SHEET_SHARING_LINK}|Submission times> updated`)
 
     return out.join("\n");
 }
