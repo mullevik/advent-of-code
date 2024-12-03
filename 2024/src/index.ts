@@ -1,9 +1,10 @@
 import * as functions from "@google-cloud/functions-framework";
-import { loadSecretsFromLocal, runBot } from "./bot";
+import { loadSecretsFromLocal } from "./bot/base";
+import { runBot } from "./bot/run";
 
 functions.http('aocBotEntrypoint', (req, res) => {
-    const auth = loadSecretsFromLocal();
-    runBot(auth, false)
-        .then((m) => res.send('Bot completed successfully'))
+    const secrets = loadSecretsFromLocal();
+    runBot(secrets, false)
+        .then(() => res.send('Bot completed successfully'))
         .catch((e) => console.error(e));
 });
