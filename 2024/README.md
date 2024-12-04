@@ -20,5 +20,5 @@ gcloud functions deploy aoc-bot \
 --runtime=nodejs22 \
 --region=europe-central2 \
 --entry-point=aocBotEntrypoint \
---trigger-http 
+--trigger-topic=aoc-triggers
 ```
