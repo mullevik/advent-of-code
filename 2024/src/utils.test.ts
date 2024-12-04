@@ -1,23 +1,23 @@
 import { fileSync } from 'tmp';
 import { writeFileSync } from 'fs';
 
-import { benchmark, readText } from "./utils";
+import { benchmark, getNonEmptyLines, readText } from "./utils";
 
-describe("readText", () => {
-    it("should read text from a file", () => {
-        const tmpFile = fileSync({ postfix: ".txt" });
-        const expectedText = "example content";
-        writeFileSync(tmpFile.name, expectedText);
-        expect(readText(tmpFile.name)).toBe(expectedText);
-        tmpFile.removeCallback();
-    })
-})
+test("readText should just read text from a file", () => {
+    const tmpFile = fileSync({ postfix: ".txt" });
+    const expectedText = "example content";
+    writeFileSync(tmpFile.name, expectedText);
+    expect(readText(tmpFile.name)).toBe(expectedText);
+    tmpFile.removeCallback();
+});
 
 
-describe("benchmark", () => {
-    it("should return the function's output", () => {
-        const [out, time] = benchmark((x: string) => x.length, "some");
-        expect(out).toBe(4);
-        expect(time).toBeCloseTo(0, 1);
-    })
-})
+test("benchmark should return function's output and time", () => {
+    const [out, time] = benchmark((x: string) => x.length, "some");
+    expect(out).toBe(4);
+    expect(time).toBeCloseTo(0, 1);
+});
+
+test("nonEmptyLines should return non empty lines", () => {
+    expect(getNonEmptyLines("foo\n  \nbar\n")).toStrictEqual(["foo", "bar"]);
+});

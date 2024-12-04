@@ -1,8 +1,12 @@
-
 import * as fs from 'fs';
+import dotenv from 'dotenv';
 
 export function readText(filePath: string): string {
     return fs.readFileSync(filePath, "utf8");
+}
+
+export function getNonEmptyLines(input: string): string[] {
+    return input.split("\n").filter(x => x.trim().length > 0);
 }
 
 export function benchmark(func: (arg1: string) => number, input: string): [number, number] {
@@ -14,6 +18,7 @@ export function benchmark(func: (arg1: string) => number, input: string): [numbe
 
 
 export function buildDay(day: number): void {
+    dotenv.config({ path: "secrets.env" });
     const zeroPadDay = day.toString().padStart(2, "0");
 
     const srcContentLines = [
@@ -29,8 +34,14 @@ export function buildDay(day: number): void {
         "import {readText} from '../utils';",
         `import {firstPart,secondPart} from './day_${zeroPadDay}';`,
         `describe('day_${zeroPadDay}', () => {`,
+        "it('should solve first part on example', () => {",
+        `expect(firstPart(readText('./inputs/${zeroPadDay}_ex'))).toBe(-1)`,
+        "});",
         "it('should solve first part', () => {",
         `expect(firstPart(readText('./inputs/${zeroPadDay}'))).toBe(-1)`,
+        "});",
+        "it('should solve second part', () => {",
+        `expect(secondPart(readText('./inputs/${zeroPadDay}_ex'))).toBe(-1)`,
         "});",
         "it('should solve second part', () => {",
         `expect(secondPart(readText('./inputs/${zeroPadDay}'))).toBe(-1)`,

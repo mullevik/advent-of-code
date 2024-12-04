@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node-terminal",
+            "name": "Test day 02",
+            "request": "launch",
+            "command": "npm run test day_02",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
