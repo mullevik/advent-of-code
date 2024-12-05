@@ -11,9 +11,8 @@ test("readText should just read text from a file", () => {
     tmpFile.removeCallback();
 });
 
-
 test("benchmark should return function's output and time", () => {
-    const [out, time] = benchmark((x: string) => x.length, "some");
+    const [out, time] = benchmark((x: string) => x.length, "some", 1);
     expect(out).toBe(4);
     expect(time).toBeCloseTo(0, 1);
 });
