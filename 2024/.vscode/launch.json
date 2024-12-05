@@ -14,6 +14,13 @@
             "request": "launch",
             "command": "npm run test day_04",
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
+            "name": "Test day 05",
+            "request": "launch",
+            "command": "npm run test day_05",
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
