@@ -10,6 +10,13 @@
         },
         {
             "type": "node-terminal",
+            "name": "Test day 03",
+            "request": "launch",
+            "command": "npm run test day_03",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
             "name": "Test day 04",
             "request": "launch",
             "command": "npm run test day_04",
@@ -20,6 +27,13 @@
             "name": "Test day 05",
             "request": "launch",
             "command": "npm run test day_05",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node-terminal",
+            "name": "Test day 06",
+            "request": "launch",
+            "command": "npm run test day_06",
             "cwd": "${workspaceFolder}"
         }
     ]
