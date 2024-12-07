@@ -11,6 +11,6 @@ describe('day_06', () => {
         expect(secondPart(readText('./inputs/06_ex'))).toBe(6)
     });
     it('should solve second part', () => {
-        expect(secondPart(readText('./inputs/06'))).toBe(-1)
+        expect(secondPart(readText('./inputs/06'))).toBe(2165)
     });
 });

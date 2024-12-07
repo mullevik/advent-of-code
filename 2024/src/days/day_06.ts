@@ -1,35 +1,33 @@
 import { arraySum } from "../array_tools";
 import { getNonEmptyLines, isInRange } from "../utils";
+import { Grid2, NumVec, vec2 } from "../vec";
 
 
 export function firstPart(input: string): number {
 
-    const world = getNonEmptyLines(input).map(line => [...line]);
-    const w = world[0].length;
-    const h = world.length;
+    const world = new Grid2(getNonEmptyLines(input).map(line => [...line]));
 
     const start = findStart(world);
-    let d: [number, number] = [-1, 0];
+    let d = new NumVec([-1, 0]);
     const [visited, _] = keepWalking(start, d, world)
 
-    return arraySum(visited.map(row => arraySum(row)));
+    return arraySum(visited.data.map(row => arraySum(row)));
 }
 export function secondPart(input: string): number {
-    const world = getNonEmptyLines(input).map(line => [...line]);
-    const w = world[0].length;
-    const h = world.length;
+    const world = new Grid2(getNonEmptyLines(input).map(line => [...line]));
 
     const start = findStart(world);
-    let d: [number, number] = [-1, 0];
+    let d = vec2(-1, 0);
     const [visited, _] = keepWalking(start, d, world);
 
     let total = 0;
-    for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) {
-            if (visited[y][x] && world[y][x] === ".") {
+    for (let y = 0; y < world.height(); y++) {
+        for (let x = 0; x < world.width(); x++) {
+            const curr = vec2(y, x);
+            if (visited.get(curr) && world.get(curr) === ".") {
 
-                const newWorld = [...world.map(row => [...row])];
-                newWorld[y][x] = "#";
+                const newWorld = new Grid2([...world.data.map(row => [...row])]);
+                newWorld.set(curr, "#");
 
                 const [_v, isFinished] = keepWalking(start, d, newWorld);
 
@@ -43,20 +41,17 @@ export function secondPart(input: string): number {
 }
 
 
-function walk(from: [number, number], d: [number, number], world: string[][], eachStepFn: (curr: [number, number], next: [number, number], d: [number, number]) => void): [[number, number], [number, number] | null] {
-    const w = world[0].length;
-    const h = world.length;
+function walk(curr: NumVec, d: NumVec, world: Grid2<string>, eachStepFn: (curr: NumVec, next: NumVec, d: NumVec) => void): [NumVec, NumVec | null] {
 
-    let curr: [number, number] = [...from];
     while (true) {
-        let next: [number, number] = [curr[0] + d[0], curr[1] + d[1]];
+        let next = curr.add(d);
         eachStepFn(curr, next, d);
 
-        if (!(isInRange(next[0], 0, h) && isInRange(next[1], 0, w))) {
+        if (!world.contains(next)) {
             return [curr, null]
         }
 
-        let nextVal = world[next[0]][next[1]];
+        let nextVal = world.get(next);
 
         if (nextVal === "#") {
             return [curr, next];
@@ -68,26 +63,23 @@ function walk(from: [number, number], d: [number, number], world: string[][], ea
     }
 }
 
-function keepWalking(curr: [number, number], d: [number, number], world: string[][]): [boolean[][], boolean] {
-    const h = world.length;
-    const w = world[0].length;
-    const visited = Array(h).fill(0).map(row => Array(w).fill(false));
-    const nReaches = Array(h).fill(0).map(row => Array(w).fill(0));
+function keepWalking(curr: NumVec, d: NumVec, world: Grid2<string>): [Grid2<boolean>, boolean] {
+    const visited = Grid2.full(world.height(), world.width(), false);
+    const nReaches = Grid2.full(world.height(), world.width(), 0);
     while (true) {
         let [reached, next] = walk(curr, d, world, (atCurr, atNext, atD) => {
-            visited[atCurr[0]][atCurr[1]] = true;
+            visited.set(atCurr, true);
         });
 
         if (next === null) {
             return [visited, true];
         } else {
             d = rotate(d);
-
-            if (nReaches[reached[0]][reached[1]] > 3) {
+            if (nReaches.get(reached) > 3) {
                 return [visited, false];
             }
 
-            nReaches[reached[0]][reached[1]] += 1;
+            nReaches.set(reached, nReaches.get(reached) + 1);
             curr = reached;
         }
     }
@@ -96,28 +88,26 @@ function keepWalking(curr: [number, number], d: [number, number], world: string[
 
 
 
-function rotate(x: [number, number]): [number, number] {
-    if (x[0] == -1 && x[1] == 0) {
-        return [0, 1]
-    } else if (x[0] == 0 && x[1] == 1) {
-        return [1, 0]
-    } else if (x[0] == 1 && x[1] == 0) {
-        return [0, -1]
-    } else if (x[0] == 0 && x[1] == -1) {
-        return [-1, 0]
+function rotate(x: NumVec): NumVec {
+    if (x.equals(vec2(-1, 0))) {
+        return vec2(0, 1);
+    } else if (x.equals(vec2(0, 1))) {
+        return vec2(1, 0);
+    } else if (x.equals(vec2(1, 0))) {
+        return vec2(0, -1);
+    } else if (x.equals(vec2(0, -1))) {
+        return vec2(-1, 0);
     }
     throw Error(`Unable to rotate ${x}`);
 }
 
-function findStart(world: string[][]): [number, number] {
-    const w = world[0].length;
-    const h = world.length;
+function findStart(world: Grid2<string>): NumVec {
 
-    let start: [number, number] = [0, 0];
-    for (const [y, row] of world.entries()) {
+    let start: NumVec = new NumVec([0, 0]);
+    for (const [y, row] of world.data.entries()) {
         for (const [x, char] of row.entries()) {
             if (char == "^") {
-                start = [y, x];
+                start = new NumVec([y, x]);
             }
         }
     }
