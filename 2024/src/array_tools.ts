@@ -23,9 +23,11 @@ export function mapZip<U, V, R>(fn: (a: U, b: V) => R, leftArray: U[], rightArra
 }
 
 
-export function arraySum(arr: number[] | boolean[]): number {
+export function arraySum(arr: number[] | boolean[] | BigInt[]): number {
 
     if (arr.every((item) => typeof item === 'number')) {
+        return arr.reduce((prev, curr) => prev + curr, 0);
+    } else if (arr.every((item) => typeof item === 'number')) {
         return arr.reduce((prev, curr) => prev + curr, 0);
     } else {
         return arr.reduce((prev, curr) => prev + (curr ? 1 : 0), 0);
