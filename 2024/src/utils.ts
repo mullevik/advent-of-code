@@ -30,20 +30,18 @@ export function buildDay(day: number): void {
     const testContentLines = [
         "import {readText} from '../utils';",
         `import {firstPart,secondPart} from './day_${zeroPadDay}';`,
-        `describe('day_${zeroPadDay}', () => {`,
-        "it('should solve first part on example', () => {",
+        "test('should solve first part on example', () => {",
         `expect(firstPart(readText('./inputs/${zeroPadDay}_ex'))).toBe(-1)`,
         "});",
-        "it('should solve first part', () => {",
+        "test('should solve first part', () => {",
         `expect(firstPart(readText('./inputs/${zeroPadDay}'))).toBe(-1)`,
         "});",
-        "it('should solve second part', () => {",
+        "test('should solve second part', () => {",
         `expect(secondPart(readText('./inputs/${zeroPadDay}_ex'))).toBe(-1)`,
         "});",
-        "it('should solve second part', () => {",
+        "test('should solve second part on example', () => {",
         `expect(secondPart(readText('./inputs/${zeroPadDay}'))).toBe(-1)`,
         "});",
-        "});"
     ];
 
     const daySrcPath = `./src/days/day_${zeroPadDay}.ts`;
