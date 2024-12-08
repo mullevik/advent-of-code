@@ -50,8 +50,16 @@ export class NumVec extends Vec<number> {
         return new NumVec(mapZip((a, b) => a + b, this.data, other.data));
     }
 
+    minus(other: NumVec): NumVec {
+        return this.add(other.multiplyScalar(-1));
+    }
+
     multiply(other: NumVec): NumVec {
         return new NumVec(mapZip((a, b) => a * b, this.data, other.data));
+    }
+
+    toString(): string {
+        return `NumVec(${this.data.toString()})`;
     }
 }
 

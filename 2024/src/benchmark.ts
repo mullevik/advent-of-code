@@ -6,6 +6,7 @@ import * as day_04 from "./days/day_04";
 import * as day_05 from "./days/day_05";
 import * as day_06 from "./days/day_06";
 import * as day_07 from "./days/day_07";
+import * as day_08 from "./days/day_08";
 
 
 benchmarkMultiple(
@@ -17,5 +18,6 @@ benchmarkMultiple(
         { dayNumber: 5, firstPartFn: day_05.firstPart, secondPartFn: day_05.secondPart },
         { dayNumber: 6, firstPartFn: day_06.firstPart, secondPartFn: day_06.secondPart },
         { dayNumber: 7, firstPartFn: day_07.firstPart, secondPartFn: day_07.secondPart },
+        { dayNumber: 8, firstPartFn: day_08.firstPart, secondPartFn: day_08.secondPart },
     ]
 )
