@@ -3,9 +3,9 @@
     "configurations": [
         {
             "type": "node-terminal",
-            "name": "Test day 07",
+            "name": "Test day 09",
             "request": "launch",
-            "command": "npm run test day_07",
+            "command": "npm run test day_09",
             "cwd": "${workspaceFolder}"
         }
     ]

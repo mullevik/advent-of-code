@@ -110,15 +110,17 @@ export interface RunnableDay {
 
 export function benchmarkMultiple(days: RunnableDay[]) {
 
-    console.log(`| day    | ${"p1 (ms)".padStart(10, " ")} | ${"p2 (ms)".padStart(10, " ")} | `);
-    console.log(`| ------ | ${"-".padStart(10, "-")} | ${"-".padStart(10, "-")} | `);
+    console.log("```");
+    console.log(`day ${"p1 (ms)".padStart(10, " ")} ${"p2 (ms)".padStart(10, " ")}`);
+    console.log("");
     for (const day of days) {
         const zeroPadDay = day.dayNumber.toString().padStart(2, "0");
         const input = fs.readFileSync(`./inputs/${zeroPadDay}`).toString();
 
         const [_1, durationFirstPart] = benchmark(day.firstPartFn, input, 5);
         const [_2, durationSecondPart] = benchmark(day.firstPartFn, input, 5);
-        console.log(`| day ${zeroPadDay} | ${durationFirstPart.toFixed(2).padStart(10, " ")} | ${durationSecondPart.toFixed(2).padStart(10, " ")} | `);
+        console.log(` ${zeroPadDay} ${durationFirstPart.toFixed(2).padStart(10, " ")} ${durationSecondPart.toFixed(2).padStart(10, " ")}`);
     }
+    console.log("```");
 }
 
