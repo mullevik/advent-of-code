@@ -106,6 +106,8 @@ export interface RunnableDay {
     dayNumber: number,
     firstPartFn: (input: string) => number,
     secondPartFn: (input: string) => number,
+    firstPartRepeats: number,
+    secondPartRepeats: number,
 }
 
 export function benchmarkMultiple(days: RunnableDay[]) {
@@ -117,8 +119,8 @@ export function benchmarkMultiple(days: RunnableDay[]) {
         const zeroPadDay = day.dayNumber.toString().padStart(2, "0");
         const input = fs.readFileSync(`./inputs/${zeroPadDay}`).toString();
 
-        const [_1, durationFirstPart] = benchmark(day.firstPartFn, input, 5);
-        const [_2, durationSecondPart] = benchmark(day.firstPartFn, input, 5);
+        const [_1, durationFirstPart] = benchmark(day.firstPartFn, input, day.firstPartRepeats);
+        const [_2, durationSecondPart] = benchmark(day.secondPartFn, input, day.secondPartRepeats);
         console.log(` ${zeroPadDay} ${durationFirstPart.toFixed(2).padStart(10, " ")} ${durationSecondPart.toFixed(2).padStart(10, " ")}`);
     }
     console.log("```");

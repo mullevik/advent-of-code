@@ -1,4 +1,4 @@
-import { benchmarkMultiple } from "./utils";
+import { benchmarkMultiple, RunnableDay } from "./utils";
 import * as day_01 from "./days/day_01";
 import * as day_02 from "./days/day_02";
 import * as day_03 from "./days/day_03";
@@ -10,16 +10,26 @@ import * as day_08 from "./days/day_08";
 import * as day_09 from "./days/day_09";
 
 
+function day(num: number, module: any, firstRepeats: number = 5, secondRepeats: number = 5): RunnableDay {
+    return {
+        dayNumber: num,
+        firstPartFn: module.firstPart,
+        secondPartFn: module.secondPart,
+        firstPartRepeats: firstRepeats,
+        secondPartRepeats: secondRepeats
+    };
+}
+
 benchmarkMultiple(
     [
-        { dayNumber: 1, firstPartFn: day_01.firstPart, secondPartFn: day_01.secondPart },
-        { dayNumber: 2, firstPartFn: day_02.firstPart, secondPartFn: day_02.secondPart },
-        { dayNumber: 3, firstPartFn: day_03.firstPart, secondPartFn: day_03.secondPart },
-        { dayNumber: 4, firstPartFn: day_04.firstPart, secondPartFn: day_04.secondPart },
-        { dayNumber: 5, firstPartFn: day_05.firstPart, secondPartFn: day_05.secondPart },
-        { dayNumber: 6, firstPartFn: day_06.firstPart, secondPartFn: day_06.secondPart },
-        { dayNumber: 7, firstPartFn: day_07.firstPart, secondPartFn: day_07.secondPart },
-        { dayNumber: 8, firstPartFn: day_08.firstPart, secondPartFn: day_08.secondPart },
-        { dayNumber: 9, firstPartFn: day_09.firstPart, secondPartFn: day_09.secondPart },
+        day(1, day_01),
+        day(2, day_02),
+        day(3, day_03),
+        day(4, day_04),
+        day(5, day_05),
+        day(6, day_06, 5, 1),
+        day(7, day_07, 5, 1),
+        day(8, day_08),
+        day(9, day_09),
     ]
 )
