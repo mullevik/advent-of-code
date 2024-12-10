@@ -110,4 +110,14 @@ export class Grid2<T> {
 
         return isInRange(vec.get(0), 0, this.height()) && isInRange(vec.get(1), 0, this.width());
     }
+
+    fourNeighborhood(vec: NumVec): NumVec[] {
+
+        return [
+            vec2(vec.get(0) - 1, vec.get(1) + 0),
+            vec2(vec.get(0) + 0, vec.get(1) + 1),
+            vec2(vec.get(0) + 1, vec.get(1) + 0),
+            vec2(vec.get(0) + 0, vec.get(1) - 1),
+        ].filter(v => this.contains(v));
+    }
 }

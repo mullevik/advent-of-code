@@ -8,6 +8,7 @@ import * as day_06 from "./days/day_06";
 import * as day_07 from "./days/day_07";
 import * as day_08 from "./days/day_08";
 import * as day_09 from "./days/day_09";
+import * as day_10 from "./days/day_10";
 
 
 function day(num: number, module: any, firstRepeats: number = 5, secondRepeats: number = 5): RunnableDay {
@@ -31,5 +32,6 @@ benchmarkMultiple(
         day(7, day_07, 5, 1),
         day(8, day_08),
         day(9, day_09),
+        day(10, day_10),
     ]
 )

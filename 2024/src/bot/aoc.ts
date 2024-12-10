@@ -28,7 +28,6 @@ const AOC_STARTS = [
     new Date(1735102800000),
 ];
 
-
 interface CompletionDayLevelDTO {
     star_index: number,
     get_star_ts: number
