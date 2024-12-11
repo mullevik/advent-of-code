@@ -31,16 +31,16 @@ export function buildDay(day: number): void {
         "import {readText} from '../utils';",
         `import {firstPart,secondPart} from './day_${zeroPadDay}';`,
         "test('should solve first part on example', () => {",
-        `expect(firstPart(readText('./inputs/${zeroPadDay}_ex'))).toBe(-1)`,
+        `expect(firstPart(readText('./inputs/${zeroPadDay}_ex'))).toBe(-1);`,
         "});",
         "test('should solve first part', () => {",
-        `expect(firstPart(readText('./inputs/${zeroPadDay}'))).toBe(-1)`,
-        "});",
-        "test('should solve second part', () => {",
-        `expect(secondPart(readText('./inputs/${zeroPadDay}_ex'))).toBe(-1)`,
+        `expect(firstPart(readText('./inputs/${zeroPadDay}'))).toBe(-1);`,
         "});",
         "test('should solve second part on example', () => {",
-        `expect(secondPart(readText('./inputs/${zeroPadDay}'))).toBe(-1)`,
+        `expect(secondPart(readText('./inputs/${zeroPadDay}_ex'))).toBe(-1);`,
+        "});",
+        "test('should solve second part', () => {",
+        `expect(secondPart(readText('./inputs/${zeroPadDay}'))).toBe(-1);`,
         "});",
     ];
 
@@ -90,24 +90,28 @@ function fetchAocDayInput(year: number, day: number, sessionCookie: string): Pro
 }
 
 
-export function benchmark(func: (arg1: string) => number, input: string, repeats: number): [number, number] {
-    let durations = [];
-    let output = -1;
-    for (let i = 0; i < repeats; i++) {
+export function benchmark(func: (arg1: string) => number, input: string): [number, number] {
+    const t0 = performance.now();
+    const firstOutput = func(input);
+    const t1 = performance.now();
+    const firstDuration = t1 - t0;
+
+    const nRepeats = Math.max(Math.floor(250 / firstDuration), 1);
+    let durations = [firstDuration];
+
+    for (let i = 0; i < nRepeats - 1; i++) {
         const t0 = performance.now();
-        output = func(input);
+        func(input);
         const t1 = performance.now();
         durations.push(t1 - t0);
     }
-    return [output, durations.reduce((prev, curr) => prev + curr, 0) / repeats];
+    return [firstOutput, durations.reduce((prev, curr) => prev + curr, 0) / nRepeats];
 }
 
 export interface RunnableDay {
     dayNumber: number,
     firstPartFn: (input: string) => number,
     secondPartFn: (input: string) => number,
-    firstPartRepeats: number,
-    secondPartRepeats: number,
 }
 
 export function benchmarkMultiple(days: RunnableDay[]) {
@@ -119,8 +123,10 @@ export function benchmarkMultiple(days: RunnableDay[]) {
         const zeroPadDay = day.dayNumber.toString().padStart(2, "0");
         const input = fs.readFileSync(`./inputs/${zeroPadDay}`).toString();
 
-        const [_1, durationFirstPart] = benchmark(day.firstPartFn, input, day.firstPartRepeats);
-        const [_2, durationSecondPart] = benchmark(day.secondPartFn, input, day.secondPartRepeats);
+        const [_1, durationFirstPart] = benchmark(day.firstPartFn, input);
+        console.error(`${zeroPadDay} returned ${_1} in avg duration of ${durationFirstPart.toFixed(2)} ms`);
+        const [_2, durationSecondPart] = benchmark(day.secondPartFn, input);
+        console.error(`${zeroPadDay} returned ${_2} in avg duration of ${durationSecondPart.toFixed(2)} ms`);
         console.log(` ${zeroPadDay} ${durationFirstPart.toFixed(2).padStart(10, " ")} ${durationSecondPart.toFixed(2).padStart(10, " ")}`);
     }
     console.log("```");

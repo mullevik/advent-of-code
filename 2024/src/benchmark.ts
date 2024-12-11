@@ -12,13 +12,11 @@ import * as day_10 from "./days/day_10";
 import * as day_11 from "./days/day_11";
 
 
-function day(num: number, module: any, firstRepeats: number = 5, secondRepeats: number = 5): RunnableDay {
+function day(num: number, module: any): RunnableDay {
     return {
         dayNumber: num,
         firstPartFn: module.firstPart,
         secondPartFn: module.secondPart,
-        firstPartRepeats: firstRepeats,
-        secondPartRepeats: secondRepeats
     };
 }
 
@@ -29,8 +27,8 @@ benchmarkMultiple(
         day(3, day_03),
         day(4, day_04),
         day(5, day_05),
-        day(6, day_06, 5, 1),
-        day(7, day_07, 5, 1),
+        day(6, day_06),
+        day(7, day_07),
         day(8, day_08),
         day(9, day_09),
         day(10, day_10),
