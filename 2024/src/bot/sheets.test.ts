@@ -12,7 +12,7 @@ test("should be able to read/write to google sheets", async () => {
 });
 
 test("should build table from members", () => {
-    let barCompletions: Completion[] = [...Array(25).keys()].map(() => { return { firstPart: null, secondPart: null } });
+    let barCompletions: Completion[] = [...Array(12).keys()].map(() => { return { firstPart: null, secondPart: null } });
     barCompletions[0].firstPart = new Date();
     barCompletions[0].secondPart = new Date();
 
@@ -20,7 +20,7 @@ test("should build table from members", () => {
         {
             name: "foo",
             n_stars: 0,
-            completions: Array(25).fill({ firstPart: null, secondPart: null }),
+            completions: Array(12).fill({ firstPart: null, secondPart: null }),
         },
         {
             name: "bar",
@@ -28,7 +28,7 @@ test("should build table from members", () => {
             completions: barCompletions,
         }
     ]);
-    const expectedWidth = 25 * 2 + 1;
+    const expectedWidth = 12 * 2 + 1;
     expect([...table.map((row) => row.length)]).toStrictEqual([expectedWidth, expectedWidth, expectedWidth]);
     expect(table[1][20]).toBe("");
     expect(table[1][1]).not.toBe("");

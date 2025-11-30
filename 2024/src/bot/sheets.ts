@@ -35,11 +35,13 @@ function formatDate(d: Date): string {
     return `${year}-${month}-${day} ${hours.padStart(2, "0")}:${minutes.padStart(2, "0")}`;
 }
 
+const N_DAYS = 12;
+
 export function buildTable(members: Member[]): string[][] {
 
     let header = ["user"];
 
-    for (const i of Array(25).keys()) {
+    for (const i of Array(N_DAYS).keys()) {
         header.push(`day ${i + 1} part 1`);
         header.push(`day ${i + 1} part 2`);
     }
@@ -50,7 +52,7 @@ export function buildTable(members: Member[]): string[][] {
     for (const member of sortedMembers) {
         let row = [member.name];
 
-        for (const i of Array(25).keys()) {
+        for (const i of Array(N_DAYS).keys()) {
             const first = member.completions[i].firstPart;
             const second = member.completions[i].secondPart;
             row.push(first === null ? "" : formatDate(first));

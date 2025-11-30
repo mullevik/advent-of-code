@@ -13,9 +13,16 @@ npm run test  # to run unit tests
 ```
 
 
-## Google cloud function
+## Deploy
 
-Deploy AoC bot to Google Cloud Run
+### GCP Infrastructure
+
+1. There must be a GCP Cloud Scheduler which triggers a topic in GCP EventArc trigger.
+2. There must be a GCP EventArc Trigger sends message to Cloud Run function.
+3. There must be a GCP Cloud Run function deployed with this project.
+
+### Google Cloud Run
+Deploy the AoC bot to Cloud Run:
 ```
 gcloud functions deploy aoc-bot \
 --gen2 \
@@ -24,6 +31,13 @@ gcloud functions deploy aoc-bot \
 --entry-point=aocBotEntrypoint \
 --trigger-topic=aoc-triggers
 ```
+
+### Events
+Check that there is an existing GCP EventArc trigger `aoc-bot-476273`.
+
+Check that there is an existing GCP Cloud Scheduler `run-aoc-bot` and resume it.
+
+
 
 ## AOC day results
 

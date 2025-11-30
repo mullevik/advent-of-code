@@ -33,7 +33,7 @@ export function buildSlackMessage(solvers: string[], winners: Winner[], yesterDa
     if (winners.length > 0) {
         for (const w of winners) {
 
-            out.push(`*${w.name}* won day ${w.dayIndex + 1} (${prettyTime(w.timeToSolveMs)} after announcement) :steam_locomotive:`);
+            out.push(`*${w.name}* deserves a :gift: for day ${w.dayIndex + 1} (solved ${prettyTime(w.timeToSolveMs)} after announcement)`);
         }
     }
 
