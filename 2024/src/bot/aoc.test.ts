@@ -17,10 +17,10 @@ test("should be able to parse aoc leaderboard", () => {
 
     const foo = parsedLeaderboard.find((m) => m.name == "foo");
     expect(foo).toBeDefined();
-    expect(foo?.completions.length).toBe(25);
+    expect(foo?.completions.length).toBe(12);
     expect(foo?.completions[0]).toStrictEqual({ firstPart: null, secondPart: null })
     const bar = parsedLeaderboard.find((m) => m.name == "bar");
-    expect(bar?.completions.length).toBe(25);
+    expect(bar?.completions.length).toBe(12);
     expect(bar?.completions[0].firstPart).not.toBeNull()
     expect(bar?.completions[0].secondPart).not.toBeNull()
 });
@@ -31,16 +31,16 @@ test("should find solvers", () => {
         {
             name: "foo",
             n_stars: 2,
-            completions: [{ firstPart: new Date("2024-12-01 8:00"), secondPart: new Date("2024-12-01 9:00") }],
+            completions: [{ firstPart: new Date("2025-12-01 8:00"), secondPart: new Date("2025-12-01 9:00") }],
         },
         {
             name: "bar",
             n_stars: 2,
-            completions: [{ firstPart: new Date("2024-12-02 12:00"), secondPart: new Date("2024-12-02 13:00") }],
+            completions: [{ firstPart: new Date("2025-12-02 12:00"), secondPart: new Date("2025-12-02 13:00") }],
         },
     ];
 
-    const [dayIndex, begin, end] = getDayIndexFromDate(new Date("2024-12-01 9:30"));
+    const [dayIndex, begin, end] = getDayIndexFromDate(new Date("2025-12-01 9:30"));
 
     expect(getSolvers(members, dayIndex, begin, end)).toStrictEqual(["foo"]);
     expect(getSolvers(members, -1, begin, end)).toStrictEqual([]);
@@ -51,15 +51,15 @@ test("should find winners", () => {
         {
             name: "foo",
             n_stars: 2,
-            completions: [{ firstPart: new Date("2024-12-01 8:00"), secondPart: new Date("2024-12-01 9:00") }],
+            completions: [{ firstPart: new Date("2025-12-01 8:00"), secondPart: new Date("2025-12-01 9:00") }],
         },
         {
             name: "bar",
             n_stars: 2,
-            completions: [{ firstPart: new Date("2024-12-02 12:00"), secondPart: new Date("2024-12-02 13:00") }],
+            completions: [{ firstPart: new Date("2025-12-02 12:00"), secondPart: new Date("2025-12-02 13:00") }],
         },
     ];
-    const [dayIndex, begin, end] = getDayIndexFromDate(new Date("2024-12-01 9:30"));
+    const [dayIndex, begin, end] = getDayIndexFromDate(new Date("2025-12-01 9:30"));
 
-    expect(getWinners(members, begin, end)).toStrictEqual([{ name: "foo", dayIndex: 0, submissionDate: new Date("2024-12-01 9:00"), timeToSolveMs: 10800000 }]);
+    expect(getWinners(members, begin, end)).toStrictEqual([{ name: "foo", dayIndex: 0, submissionDate: new Date("2025-12-01 9:00"), timeToSolveMs: 10800000 }]);
 });

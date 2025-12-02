@@ -1,31 +1,18 @@
 import { Completion, Member, Winner } from "./base";
 
 const AOC_STARTS = [
-    new Date(1733029200000),
-    new Date(1733115600000),
-    new Date(1733202000000),
-    new Date(1733288400000),
-    new Date(1733374800000),
-    new Date(1733461200000),
-    new Date(1733547600000),
-    new Date(1733634000000),
-    new Date(1733720400000),
-    new Date(1733806800000),
-    new Date(1733893200000),
-    new Date(1733979600000),
-    new Date(1734066000000),
-    new Date(1734152400000),
-    new Date(1734238800000),
-    new Date(1734325200000),
-    new Date(1734411600000),
-    new Date(1734498000000),
-    new Date(1734584400000),
-    new Date(1734670800000),
-    new Date(1734757200000),
-    new Date(1734843600000),
-    new Date(1734930000000),
-    new Date(1735016400000),
-    new Date(1735102800000),
+    new Date(1764565200000),// 01
+    new Date(1764651600000),// 02
+    new Date(1764738000000),// 03
+    new Date(1764824400000),// 04
+    new Date(1764910800000),// 05
+    new Date(1764997200000),// 06
+    new Date(1765083600000),// 07
+    new Date(1765170000000),// 08
+    new Date(1765256400000),// 09
+    new Date(1765342800000),// 10
+    new Date(1765429200000),// 11
+    new Date(1765515600000),// 12
 ];
 
 interface CompletionDayLevelDTO {
@@ -53,6 +40,8 @@ interface LeaderboardDTO {
         [key: string]: MemberDTO
     };
 }
+
+const N_DAYS = 12;
 
 
 export async function fetchLeaderBoard(leaderboardUrl: string, sessionCookie: string): Promise<Member[]> {
@@ -83,7 +72,7 @@ export function parseLeaderboardObject(leaderboard: LeaderboardDTO): Member[] {
 
 function parseMemberObject(member: MemberDTO): Member {
 
-    let completions: Completion[] = new Array(25).fill({ firstPart: null, secondPart: null });
+    let completions: Completion[] = new Array(N_DAYS).fill({ firstPart: null, secondPart: null });
 
     for (const [dayName, completion] of Object.entries(member.completion_day_level)) {
 
@@ -125,7 +114,7 @@ export function getWinners(members: Member[], begin: Date, end: Date): Winner[] 
     }
 
     const winners = [];
-    for (const i of Array(25).keys()) {
+    for (const i of Array(N_DAYS).keys()) {
 
         const sortedMembers = [...members].filter((m) => safeSecondPart(m, i) !== null).sort((a, b) => compareMembersAtDay(a, b, i));
 
@@ -162,7 +151,7 @@ export function getDayIndexFromDate(x: Date): [number, Date, Date] {
         }
     }
 
-    return [24, AOC_STARTS[24], new Date(AOC_STARTS[24].getTime() + 24 * 60 * 60 * 1000)];
+    return [N_DAYS - 1, AOC_STARTS[N_DAYS - 1], new Date(AOC_STARTS[N_DAYS - 1].getTime() + 24 * 60 * 60 * 1000)];
 }
 
 export function getSolvers(members: Member[], dayIndex: number, begin: Date, end: Date): string[] {
