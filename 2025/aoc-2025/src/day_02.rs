@@ -70,12 +70,12 @@ mod tests {
 
     #[test]
     fn test_part_one() {
-        let input_02 = fs::read_to_string("inputs/02_example").unwrap();
+        let input_02 = fs::read_to_string("inputs/02.example").unwrap();
         assert_eq!(solve_part_one(input_02.as_str()), 1227775554);
     }
     #[test]
     fn test_part_two() {
-        let input_02 = fs::read_to_string("inputs/02_example").unwrap();
+        let input_02 = fs::read_to_string("inputs/02.example").unwrap();
         assert_eq!(solve_part_two(input_02.as_str()), 4174379265);
     }
 
