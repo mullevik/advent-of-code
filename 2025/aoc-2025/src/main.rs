@@ -13,5 +13,5 @@ fn main() {
     // let input_03 = fs::read_to_string("inputs/03.in").unwrap();
     // println!("{}", day_03::solve_part_two(&input_03))
     let input = fs::read_to_string("inputs/04.in").unwrap();
-    println!("{}", day_04::p1(&input))
+    println!("{}", day_04::p2(&input))
 }

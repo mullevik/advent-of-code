@@ -12,8 +12,12 @@ impl<T> Vec2<T> {
 pub fn p1(input: &str) -> i32 {
     let grid = parse(input);
     let dim = Vec2::new(grid.first().unwrap().len() as i32, grid.len() as i32);
-    let mut n_accessible_papers = 0;
 
+    find_accessible_papers(&grid, &dim).len() as i32
+}
+
+fn find_accessible_papers(grid: &Vec<Vec<char>>, dim: &Vec2<i32>) -> Vec<Vec2<i32>> {
+    let mut accessible = vec![];
     for y in 0..dim.y {
         for x in 0..dim.x {
             let p = Vec2::new(x, y);
@@ -26,12 +30,33 @@ pub fn p1(input: &str) -> i32 {
                     .count();
 
                 if n_papers_around < 4 {
-                    n_accessible_papers += 1;
+                    accessible.push(p);
                 }
             }
         }
     }
-    n_accessible_papers
+    accessible
+}
+
+pub fn p2(input: &str) -> i32 {
+    let mut grid = parse(input);
+    let dim = Vec2::new(grid.first().unwrap().len() as i32, grid.len() as i32);
+
+    let mut n_accessible = 0;
+    loop {
+        let accessible = find_accessible_papers(&grid, &dim);
+
+        if accessible.is_empty() {
+            break;
+        }
+
+        for a in accessible.iter() {
+            grid[a.y as usize][a.x as usize] = '.';
+        }
+
+        n_accessible += accessible.len();
+    }
+    n_accessible as i32
 }
 
 fn parse(input: &str) -> Vec<Vec<char>> {
@@ -61,7 +86,7 @@ fn eight_adjacents(p: &Vec2<i32>, dim: &Vec2<i32>) -> Vec<Vec2<i32>> {
 }
 
 mod tests {
-    use crate::day_04::p1;
+    use crate::day_04::{p1, p2};
     use std::fs;
 
     #[test]
@@ -70,5 +95,11 @@ mod tests {
         assert_eq!(p1(&input), 2);
         let input = fs::read_to_string("inputs/04.example").unwrap();
         assert_eq!(p1(&input), 13);
+    }
+
+    #[test]
+    fn test_p2() {
+        let input = fs::read_to_string("inputs/04.example").unwrap();
+        assert_eq!(p2(&input), 43);
     }
 }
