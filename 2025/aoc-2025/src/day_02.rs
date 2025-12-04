@@ -1,4 +1,4 @@
-pub fn solve_part_one(input: &str) -> i64 {
+pub fn p1(input: &str) -> i64 {
     input
         .split(",")
         .filter(|x| x.trim().len() > 0)
@@ -7,7 +7,7 @@ pub fn solve_part_one(input: &str) -> i64 {
         .sum()
 }
 
-pub fn solve_part_two(input: &str) -> i64 {
+pub fn p2(input: &str) -> i64 {
     input
         .split(",")
         .filter(|x| x.trim().len() > 0)
@@ -66,17 +66,17 @@ fn is_invalid(x_str: &String, size: usize) -> bool {
 mod tests {
     use std::fs;
 
-    use crate::day_02::{is_invalid_any, is_invalid_half, solve_part_one, solve_part_two};
+    use crate::day_02::{is_invalid_any, is_invalid_half, p1, p2};
 
     #[test]
-    fn test_part_one() {
+    fn test_p1() {
         let input_02 = fs::read_to_string("inputs/02.example").unwrap();
-        assert_eq!(solve_part_one(input_02.as_str()), 1227775554);
+        assert_eq!(p1(input_02.as_str()), 1227775554);
     }
     #[test]
-    fn test_part_two() {
+    fn test_p2() {
         let input_02 = fs::read_to_string("inputs/02.example").unwrap();
-        assert_eq!(solve_part_two(input_02.as_str()), 4174379265);
+        assert_eq!(p2(input_02.as_str()), 4174379265);
     }
 
     #[test]

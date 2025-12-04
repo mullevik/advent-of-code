@@ -60,7 +60,7 @@ fn eight_adjacents(p: &Vec2<i32>, dim: &Vec2<i32>) -> Vec<Vec2<i32>> {
     .collect::<Vec<_>>()
 }
 
-mod test {
+mod tests {
     use crate::day_04::p1;
     use std::fs;
 
