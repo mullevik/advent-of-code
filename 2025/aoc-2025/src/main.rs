@@ -20,5 +20,5 @@ fn main() {
     // let input = fs::read_to_string("inputs/05.in").unwrap();
     // println!("{}", day_05::p2(&input))
     let input = fs::read_to_string("inputs/06.in").unwrap();
-    println!("{}", day_06::p1(&input))
+    println!("{}", day_06::p2(&input))
 }
