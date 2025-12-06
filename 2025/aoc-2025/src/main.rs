@@ -1,10 +1,12 @@
 use std::fs;
 
+mod commons;
 mod day_01;
 mod day_02;
 mod day_03;
 mod day_04;
 mod day_05;
+mod day_06;
 
 fn main() {
     // let input_01 = fs::read_to_string("inputs/01").unwrap();
@@ -15,6 +17,8 @@ fn main() {
     // println!("{}", day_03::solve_part_two(&input_03))
     // let input = fs::read_to_string("inputs/04.in").unwrap();
     // println!("{}", day_04::p2(&input))
-    let input = fs::read_to_string("inputs/05.in").unwrap();
-    println!("{}", day_05::p2(&input))
+    // let input = fs::read_to_string("inputs/05.in").unwrap();
+    // println!("{}", day_05::p2(&input))
+    let input = fs::read_to_string("inputs/06.in").unwrap();
+    println!("{}", day_06::p1(&input))
 }

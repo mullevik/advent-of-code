@@ -1,13 +1,4 @@
-struct Vec2<T> {
-    pub x: T,
-    pub y: T,
-}
-
-impl<T> Vec2<T> {
-    fn new(x: T, y: T) -> Self {
-        Vec2 { x: x, y: y }
-    }
-}
+use crate::commons::Vec2;
 
 pub fn p1(input: &str) -> i32 {
     let grid = parse(input);
