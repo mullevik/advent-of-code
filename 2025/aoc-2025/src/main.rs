@@ -7,6 +7,7 @@ mod day_03;
 mod day_04;
 mod day_05;
 mod day_06;
+mod day_07;
 
 fn main() {
     // let input_01 = fs::read_to_string("inputs/01").unwrap();
