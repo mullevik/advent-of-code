@@ -8,6 +8,7 @@ mod day_04;
 mod day_05;
 mod day_06;
 mod day_07;
+mod gen_06;
 
 fn main() {
     // let input_01 = fs::read_to_string("inputs/01").unwrap();
@@ -22,6 +23,7 @@ fn main() {
     // println!("{}", day_05::p2(&input))
     // let input = fs::read_to_string("inputs/06.in").unwrap();
     // println!("{}", day_06::p2(&input))
-    let input = fs::read_to_string("inputs/07.in").unwrap();
-    println!("{}", day_07::p2(&input))
+    println!("{}", gen_06::generate(4, 100, 4))
+    // let input = fs::read_to_string("inputs/07.in").unwrap();
+    // println!("{}", day_07::p2(&input))
 }

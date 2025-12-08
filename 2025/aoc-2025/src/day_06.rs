@@ -55,7 +55,16 @@ pub fn p2(input: &str) -> i64 {
                 }
 
                 let num_s = num_string.replace(" ", "");
-                let num = num_s.parse::<i64>().unwrap();
+                let num = match num_s.parse::<i64>() {
+                    Ok(x) => x,
+                    Err(_) => {
+                        if op == '+' {
+                            0
+                        } else {
+                            1
+                        }
+                    }
+                };
                 column_total = op_fn(column_total, num);
             }
             column_total
@@ -120,7 +129,8 @@ fn parse_columns(num_lines: &[&str], col_sizes: &Vec<i64>) -> Vec<Vec<Vec<char>>
             for c in col_sizes.iter() {
                 let mut nums = vec![];
 
-                for _ in 0..*c {
+                for i in 0..*c {
+                    // println!("'{}' {} {:?} {:?}", remaining_line, i, col_sizes, nums);
                     let char: char = remaining_line.chars().next().unwrap();
                     remaining_line.remove(0);
 
@@ -144,14 +154,26 @@ mod tests {
 
     #[test]
     fn test_p1() {
-        let input = fs::read_to_string("inputs/06.example").unwrap();
-        assert_eq!(p1(&input), 4277556);
+        assert_eq!(
+            p1(&fs::read_to_string("inputs/06.example").unwrap()),
+            4277556
+        );
+        assert_eq!(
+            p1(&fs::read_to_string("inputs/06.mine").unwrap()),
+            4820957245409
+        );
     }
 
     #[test]
     fn test_p2() {
-        let input = fs::read_to_string("inputs/06.example").unwrap();
-        assert_eq!(p2(&input), 3263827);
+        assert_eq!(
+            p2(&fs::read_to_string("inputs/06.example").unwrap()),
+            3263827
+        );
+        assert_eq!(
+            p2(&fs::read_to_string("inputs/06.mine").unwrap()),
+            652762467393
+        );
     }
 
     #[test]
