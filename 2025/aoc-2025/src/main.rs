@@ -20,6 +20,8 @@ fn main() {
     // println!("{}", day_04::p2(&input))
     // let input = fs::read_to_string("inputs/05.in").unwrap();
     // println!("{}", day_05::p2(&input))
-    let input = fs::read_to_string("inputs/06.in").unwrap();
-    println!("{}", day_06::p2(&input))
+    // let input = fs::read_to_string("inputs/06.in").unwrap();
+    // println!("{}", day_06::p2(&input))
+    let input = fs::read_to_string("inputs/07.in").unwrap();
+    println!("{}", day_07::p2(&input))
 }

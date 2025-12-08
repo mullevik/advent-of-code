@@ -19,6 +19,24 @@ pub fn p1(input: &str) -> i32 {
     n_splits
 }
 
+pub fn p2(input: &str) -> i64 {
+    let (start, tachyons) = parse_input(input);
+    let n_cols = tachyons.first().unwrap().len();
+    let mut beams = vec![0; n_cols];
+    beams[start] = 1;
+
+    for tachyon_row in tachyons.iter() {
+        for (x, t) in tachyon_row.iter().enumerate() {
+            if beams[x] > 0 && *t {
+                beams[x - 1] = beams[x - 1] + beams[x];
+                beams[x + 1] = beams[x + 1] + beams[x];
+                beams[x] = 0;
+            }
+        }
+    }
+    beams.iter().sum()
+}
+
 fn parse_input(input: &str) -> (usize, Vec<Vec<bool>>) {
     let non_empty_lines = input
         .split("\n")
@@ -50,11 +68,15 @@ fn parse_input(input: &str) -> (usize, Vec<Vec<bool>>) {
 mod tests {
     use std::fs;
 
-    use crate::day_07::p1;
+    use crate::day_07::{p1, p2};
 
     #[test]
     fn test_p1() {
+        assert_eq!(p1(&fs::read_to_string("inputs/07.example").unwrap()), 21);
+    }
+    #[test]
+    fn test_p2() {
         let input = fs::read_to_string("inputs/07.example").unwrap();
-        assert_eq!(p1(&input), 21);
+        assert_eq!(p2(&input), 40);
     }
 }
