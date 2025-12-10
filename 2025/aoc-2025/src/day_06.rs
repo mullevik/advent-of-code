@@ -162,6 +162,10 @@ mod tests {
             p1(&fs::read_to_string("inputs/06.mine").unwrap()),
             4820957245409
         );
+        assert_eq!(
+            p1(&fs::read_to_string("inputs/06.generated").unwrap()),
+            1866756725
+        );
     }
 
     #[test]
@@ -173,6 +177,10 @@ mod tests {
         assert_eq!(
             p2(&fs::read_to_string("inputs/06.mine").unwrap()),
             652762467393
+        );
+        assert_eq!(
+            p2(&fs::read_to_string("inputs/06.generated").unwrap()),
+            1987924012
         );
     }
 
