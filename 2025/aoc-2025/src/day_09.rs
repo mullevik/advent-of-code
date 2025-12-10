@@ -3,6 +3,8 @@ use std::{
     collections::HashSet,
 };
 
+use rayon::iter::{ParallelBridge, ParallelIterator};
+
 use crate::{commons::Vec2, vec2};
 
 pub fn p1(input: &str) -> i64 {
@@ -54,27 +56,23 @@ pub fn p2(input: &str) -> i64 {
             centroids.push((c, is_inside(c, &lines)));
         }
     }
-    // println!("centroids {:?}", centroids);
-
-    let mut mx = 0;
-    for i in 0..points.len() {
-        for j in 0..points.len() {
+    let cross_prod_indices = (0..points.len()).flat_map(|i| (0..points.len()).map(move |j| (i, j)));
+    cross_prod_indices
+        .par_bridge()
+        .map(|(i, j)| {
             let bbox = (points[i], points[j]);
-            let bbox_area = area(bbox);
-            let overlapping_centroids = centroids
+            if centroids
                 .iter()
                 .filter(|c| contains(bbox, c.0))
-                .collect::<Vec<_>>();
-
-            if overlapping_centroids.iter().all(|c| c.1) {
-                println!("valid rect is: {:?} ({})", bbox, bbox_area);
-                if bbox_area > mx {
-                    mx = bbox_area
-                }
+                .all(|c| c.1)
+            {
+                area(bbox)
+            } else {
+                0
             }
-        }
-    }
-    mx
+        })
+        .max()
+        .unwrap()
 }
 
 fn area(bbox: (Vec2<i32>, Vec2<i32>)) -> i64 {
