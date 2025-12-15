@@ -14,6 +14,7 @@ mod day_04;
 mod day_05;
 mod day_06;
 mod day_07;
+mod day_08;
 mod day_09;
 mod gen_06;
 
@@ -46,7 +47,7 @@ fn main() -> Result<()> {
 
     match cli.command {
         Commands::Exec { file_path } => {
-            println!("{}", day_06::p2(&fs::read_to_string(file_path)?))
+            println!("{}", day_08::p2(&fs::read_to_string(file_path)?))
         }
         Commands::Generate {
             n_rows,
