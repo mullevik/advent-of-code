@@ -45,8 +45,8 @@ def evaluate_day(day: int) -> None:
     mod = AUTO_IMPORTED_DAILY_MODULES[day - 1]
     inp = (pathlib.Path("inputs") / f"{day:02d}.in").read_text()
     p1_out, p1_dt = measure_fn(getattr(mod, "p1"), inp)
-    p2_out, p2_dt = measure_fn(getattr(mod, "p2"), inp)
     print(f"day {day:02d} p1: {p1_out} (in {p1_dt})")
+    p2_out, p2_dt = measure_fn(getattr(mod, "p2"), inp)
     print(f"day {day:02d} p2: {p2_out} (in {p2_dt})")
 
 

@@ -7,11 +7,17 @@ Just a pure programming practice with Zed editor and simple python code.
 Evaluate all days (assuming you have real inputs in `inputs/` directory in the format of `day.in` (e.g. `inputs/01.in`))
 
 ```
-uv run python main.py
+uv run eval
 ```
 
 Evaluate some days
 
 ```
-uv run python main.py 1 3
+uv run eval 1 3
+```
+
+Run unit tests
+
+```
+uv run pytest
 ```
