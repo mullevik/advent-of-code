@@ -1,9 +1,12 @@
+from aoc.commons import non_empty_lines
+
+
 def p1(inp: str) -> str:
-    return str(sum(int(p) for p in get_parts(inp) if p.strip()))
+    return str(sum(int(p) for p in get_parts(inp)))
 
 
 def p2(inp: str) -> str:
-    parts = [p for p in get_parts(inp) if p.strip()]
+    parts = get_parts(inp)
 
     i = 0
     visited = {0}
@@ -19,4 +22,6 @@ def p2(inp: str) -> str:
 
 
 def get_parts(inp: str) -> list[str]:
-    return inp.split("\n") if "\n" in inp else inp.split(",")
+    if "\n" in inp:
+        return non_empty_lines(inp)
+    return [line for line in inp.split(",") if line.strip()]

@@ -1,11 +1,11 @@
 from collections import Counter
 from collections.abc import Iterable
 
+from aoc.commons import non_empty_lines
+
 
 def p1(inp: str) -> str:
-    lines = [line for line in inp.split("\n") if line]
-    counters = [Counter(line) for line in lines]
-
+    counters = [Counter(line) for line in non_empty_lines(inp)]
     return str(count_occurrences(counters, 2) * count_occurrences(counters, 3))
 
 
@@ -14,7 +14,7 @@ def count_occurrences(counters: Iterable[Counter], amount: int) -> int:
 
 
 def p2(inp: str) -> str:
-    lines = [line for line in inp.split("\n") if line]
+    lines = non_empty_lines(inp)
 
     for line in lines:
         for other in lines:
