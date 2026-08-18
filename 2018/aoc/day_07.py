@@ -30,7 +30,7 @@ def p2(inp: str, n_workers: int = 5, task_duration_penalty: int = 60) -> str:
         chain(g.keys(), {adj for adjacents in g.values() for adj in adjacents})
     )
 
-    waiting_set = set()
+    waiting_tasks = set()
     assigned_tasks = set()
 
     while remaining_tasks:
@@ -40,10 +40,10 @@ def p2(inp: str, n_workers: int = 5, task_duration_penalty: int = 60) -> str:
             remaining_tasks.remove(t)
             if t in g:
                 del g[t]
-            waiting_set.discard(t)
+            waiting_tasks.discard(t)
 
         free_tasks = sorted(
-            set(chain(get_free_tasks_in_order(g, remaining_tasks), waiting_set))
+            set(chain(get_free_tasks_in_order(g, remaining_tasks), waiting_tasks))
         )
 
         for ft in free_tasks:
@@ -53,7 +53,7 @@ def p2(inp: str, n_workers: int = 5, task_duration_penalty: int = 60) -> str:
             if task_assigned:
                 assigned_tasks.add(ft)
             else:
-                waiting_set.add(ft)
+                waiting_tasks.add(ft)
 
         time += 1
     return str(time - 1)
