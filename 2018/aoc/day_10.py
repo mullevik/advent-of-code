@@ -1,5 +1,6 @@
 import re
 from collections.abc import Iterable
+from math import floor
 
 from aoc.day_06 import manhattan_dist
 
@@ -14,9 +15,10 @@ def p2(inp: str) -> str:
     return str(simulate_all(list(parse(inp))))
 
 
-EPS = 1.0
 RESOLUTION_WIDTH = 100
 RESOLUTION_HEIGHT = 50
+SLOW_DOWN_CONST = 100
+SLOW_DOWN_MULTIPLIER = 8.0
 
 
 def simulate_all(points: list[tuple[vec2, vec2]]) -> int:
@@ -24,7 +26,9 @@ def simulate_all(points: list[tuple[vec2, vec2]]) -> int:
     min_avg_dist = avg_dist(points)
     while True:
         avg_dst = avg_dist(points)
-        multiplier = decide_multiplier(avg_dst)
+        multiplier = max(
+            1, int(floor(avg_dst / SLOW_DOWN_MULTIPLIER)) - SLOW_DOWN_CONST
+        )
 
         if avg_dst > min_avg_dist:
             points = list(simulate(points, -1))
@@ -35,15 +39,6 @@ def simulate_all(points: list[tuple[vec2, vec2]]) -> int:
         n_seconds += 1 * multiplier
         min_avg_dist = min(avg_dst, min_avg_dist)
         points = list(simulate(points, multiplier))
-
-
-def decide_multiplier(avg_dst: float) -> int:
-    if avg_dst > 10_000:
-        return 1000
-    elif avg_dst > 1000:
-        return 100
-    else:
-        return 1
 
 
 def avg_dist(points: list[tuple[vec2, vec2]]) -> float:
